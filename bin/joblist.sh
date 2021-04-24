@@ -1,3 +1,6 @@
 #!/bin/bash
 
-python ~/large0/sc/job_status.py --list
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+
+python $SCRIPT_DIR/job_status.py --list
+
