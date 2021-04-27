@@ -3,7 +3,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 
 
-save_file = Path(__file__).parent / 'jobs.txt'
+save_file = Path().home() / 'jobs.txt'
 
 
 def call(cmd, encoding='utf-8'):

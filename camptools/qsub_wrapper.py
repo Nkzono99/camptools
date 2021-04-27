@@ -5,6 +5,9 @@ from pathlib import Path
 import subprocess
 
 
+save_file = Path().home() / 'jobs.txt'
+
+
 def calc_procs(filename):
     nml = f90nml.read(filename)
     nodes_str = nml['mpi']['nodes']
@@ -54,7 +57,6 @@ def qsub(filename):
 
 
 def save_job_id(job_id):
-    save_file = Path(__file__).parent / 'jobs.txt'
     save_file.touch(exist_ok=True)
     with open(str(save_file), 'a', encoding='utf-8') as f:
         f.write('{}: {}\n'.format(job_id, Path('.').resolve()))
