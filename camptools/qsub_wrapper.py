@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 
 
-save_file = Path(__file__).parent / 'jobs.txt'
+save_file = Path().home() / 'jobs.txt'
 
 
 def calc_procs(filename):
@@ -20,7 +20,6 @@ def parse_args():
     parser.add_argument('jobfile')
     parser.add_argument('--inputfile', '-i', default='plasma.inp')
     parser.add_argument('--output', '-o', default='myjob.sh')
-    parser.add_argument('--noem', action='store_true')
     return parser.parse_args()
 
 
@@ -43,29 +42,41 @@ def create_emjob(inputfile, jobfile, outputfile):
 
 
 def qsub(filename):
+    # execute 'qsub <job-file>'
     res = subprocess.Popen(
         ['qsub', filename],
         stdout=subprocess.PIPE)
-    return [line.decode('utf-8') for line in res.stdout.readlines()]
+
+    # byte to str and show
+    res_str = [line.decode('utf-8') for line in res.stdout.readlines()][:1]
+    print(''.join(res_str))
+
+    # extracte job_id from response
+    job_id = int(res_str[0].replace('.ja', '').strip())
+    return job_id
 
 
-def main():
-    args = parse_args()
-
-    jobfile = args.jobfile
-    if not args.noem:
-        create_emjob(args.inputfile, args.jobfile, args.output)
-        jobfile = args.output        
-
-    res = qsub(jobfile)[:1]
-    print(''.join(res))
-    job_id = int(res[0].replace('.ja', '').strip())
-    
+def save_job_id(job_id):
     save_file.touch(exist_ok=True)
     with open(str(save_file), 'a', encoding='utf-8') as f:
         f.write('{}: {}\n'.format(job_id, Path('.').resolve()))
 
 
-if __name__ == '__main__':
-    main()
+def nmyqsub():
+    args = parse_args()
 
+    jobfile = args.jobfile
+
+    job_id = qsub(jobfile)
+    save_job_id(job_id)
+
+
+def myqsub():
+    args = parse_args()
+
+    jobfile = args.jobfile
+    create_emjob(args.inputfile, args.jobfile, args.output)
+    jobfile = args.output
+
+    job_id = qsub(jobfile)
+    save_job_id(job_id)
