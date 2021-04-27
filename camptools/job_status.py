@@ -48,8 +48,6 @@ class Job:
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument('--status', action='store_true')
-    parser.add_argument('--list', action='store_true')
     return parser.parse_args()
 
 
@@ -63,7 +61,10 @@ def create_jobs():
     return jobs
 
 
-def show_joblist(jobs):
+def joblist():
+    args = parse_args()
+    jobs = create_jobs()
+
     job_dict = create_job_dict()
 
     print('=' * 20)
@@ -73,29 +74,17 @@ def show_joblist(jobs):
             directory = job_dict[job.jobid]
         else:
             directory = 'Not Found'
-        print('{} ({}, {}) : {}'.format(job.jobid, job.status, job.elapse, directory))
+        print('{} ({}, {}) : {}'.format(
+            job.jobid, job.status, job.elapse, directory))
 
     print('=' * 20)
 
 
-def show_job_status(jobs):
+def job_status():
+    args = parse_args()
+    jobs = create_jobs()
+
     for job in jobs:
         print('{}({})'.format(job.jobid, job.status))
         print(job.tail())
         print('')
-
-
-def main():
-    args = parse_args()
-
-    jobs = create_jobs()
-
-    if args.list:
-        show_joblist(jobs)
-
-    if args.status:
-        show_job_status(jobs)
-
-
-if __name__ == '__main__':
-    main()
