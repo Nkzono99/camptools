@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.1.0",
+    version="0.2.1",
     install_requires=[
         'f90nml',
     ],
@@ -15,6 +15,7 @@ setup(
             'myqsub = camptools.qsub_wrapper:myqsub',
             'job_status = camptools.job_status:job_status',
             'joblist = camptools.job_status:joblist',
+            'jobhistory = camptools.job_history:job_history',
         ]
     },
     author="Nkzono",
