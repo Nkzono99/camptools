@@ -86,9 +86,6 @@ class JobDict(Singleton):
                 if job is not None:
                     self.dict[job.job_id] = job
 
-    def __getitem__(self, job_id: int) -> JobData:
-        return self.dict[job_id]
-
     def correct_date(self, force=False):
         for job in self.dict.values():
             job.correct_date(force=force)
@@ -97,3 +94,9 @@ class JobDict(Singleton):
         with open(str(self.save_file), 'w', encoding='utf-8') as f:
             for job in self.dict.values():
                 f.write('{}\n'.format(job))
+
+    def __iter__(self):
+        return iter(self.dict)
+
+    def __getitem__(self, job_id: int) -> JobData:
+        return self.dict[job_id]
