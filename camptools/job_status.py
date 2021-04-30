@@ -1,32 +1,11 @@
-import subprocess
-from pathlib import Path
 from argparse import ArgumentParser
+from pathlib import Path
+
+from .jobs import JobDict
+from .utils import call
 
 
-save_file = Path().home() / 'jobs.txt'
-
-
-def call(cmd, encoding='utf-8'):
-    p = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    o_data, e_data = p.communicate()
-    return o_data.decode(encoding), e_data.decode(encoding)
-
-
-def create_job_dict():
-    job_dict = {}
-    with open(str(save_file), 'r', encoding='utf-8') as f:
-        for line in f:
-            splited = line.split(':')
-            if len(splited) != 2:
-                continue
-            job_id = int(splited[0].strip())
-            directory = splited[1].strip()
-            job_dict[job_id] = directory
-    return job_dict
-
-
-class Job:
+class JobInfo:
     def __init__(self, tokens, encoding='utf-8'):
         self.queue = tokens[0]
         self.user = tokens[1]
@@ -46,36 +25,39 @@ class Job:
         return o_data
 
 
-def parse_args():
-    parser = ArgumentParser()
-    return parser.parse_args()
-
-
 def create_jobs():
     o_data, e_data = call('qs', encoding='utf-8')
     lines = o_data.split('\n')
     jobs = []
     for line in lines[1:-1]:
         tokens = line.strip().split()
-        jobs.append(Job(tokens))
+        jobs.append(JobInfo(tokens))
     return jobs
+
+
+def parse_args():
+    parser = ArgumentParser()
+    return parser.parse_args()
 
 
 def joblist():
     args = parse_args()
     jobs = create_jobs()
 
-    job_dict = create_job_dict()
+    job_dict = JobDict()
+    job_dict.load()
 
     print('=' * 20)
 
     for job in jobs:
         if job.jobid in job_dict:
-            directory = job_dict[job.jobid]
+            directory = job_dict[job.jobid].directory
+            message = job_dict[job.jobid].message
         else:
             directory = 'Not Found'
-        print('{} ({}, {}) : {}'.format(
-            job.jobid, job.status, job.elapse, directory))
+            message = ''
+        print('{} ({}, {}) : {} : {}'.format(
+            job.jobid, job.status, job.elapse, directory, message))
 
     print('=' * 20)
 

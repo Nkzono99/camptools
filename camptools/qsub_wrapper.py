@@ -1,9 +1,11 @@
+import datetime
+import subprocess
 from argparse import ArgumentParser
+from pathlib import Path
 
 import f90nml
-from pathlib import Path
-import subprocess
 
+from .jobs import JobDict
 
 save_file = Path().home() / 'jobs.txt'
 
@@ -13,14 +15,6 @@ def calc_procs(filename):
     nodes_str = nml['mpi']['nodes']
     nodes = list(map(int, nodes_str))
     return nodes[0] * nodes[1] * nodes[2]
-
-
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument('jobfile')
-    parser.add_argument('--inputfile', '-i', default='plasma.inp')
-    parser.add_argument('--output', '-o', default='myjob.sh')
-    return parser.parse_args()
 
 
 def create_emjob(inputfile, jobfile, outputfile):
@@ -56,10 +50,14 @@ def qsub(filename):
     return job_id
 
 
-def save_job_id(job_id):
-    save_file.touch(exist_ok=True)
-    with open(str(save_file), 'a', encoding='utf-8') as f:
-        f.write('{}: {}\n'.format(job_id, Path('.').resolve()))
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('jobfile')
+    parser.add_argument('--inputfile', '-i', default='plasma.inp')
+    parser.add_argument('--output', '-o', default='myjob.sh')
+    parser.add_argument('--message', '-m', default='')
+    parser.add_argument('--date', action='store_true')
+    return parser.parse_args()
 
 
 def nmyqsub():
@@ -68,7 +66,12 @@ def nmyqsub():
     jobfile = args.jobfile
 
     job_id = qsub(jobfile)
-    save_job_id(job_id)
+
+    date = ''
+    if args.date:
+        date = str(datetime.datetime.now())
+
+    JobDict().save_job(job_id, Path('.').resolve(), args.message, date)
 
 
 def myqsub():
@@ -79,4 +82,9 @@ def myqsub():
     jobfile = args.output
 
     job_id = qsub(jobfile)
-    save_job_id(job_id)
+
+    date = ''
+    if args.date:
+        date = str(datetime.datetime.now())
+
+    JobDict().save_job(job_id, Path('.').resolve(), args.message, date)
