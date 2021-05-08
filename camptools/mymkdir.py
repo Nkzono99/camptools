@@ -34,7 +34,7 @@ def search_copylist(filename: PathLike, key: str) -> List[Path]:
 
 def copy(from_file: Path, to_file: Path):
     if from_file.exists():
-        sh.copyfile(str(from_file), str(to_file))
+        sh.copy(str(from_file), str(to_file))
     else:
         print('{} is not found'.format(from_file))
 
