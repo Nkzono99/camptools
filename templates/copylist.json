@@ -1,0 +1,11 @@
+{
+    "main": [
+        "filepath1",
+        "filepath2"
+    ],
+
+    "sub1": [
+        "filepath3",
+        "filepath4"
+    ]
+}

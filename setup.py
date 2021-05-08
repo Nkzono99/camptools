@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.2.1",
+    version="0.3.0",
     install_requires=[
         'f90nml',
     ],
@@ -16,6 +16,7 @@ setup(
             'job_status = camptools.job_status:job_status',
             'joblist = camptools.job_status:joblist',
             'jobhistory = camptools.job_history:job_history',
+            'mymkdir = camptools.mymkdir:mymkdir',
         ]
     },
     author="Nkzono",
