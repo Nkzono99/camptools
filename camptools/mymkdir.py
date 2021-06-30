@@ -1,9 +1,10 @@
+import json
 from argparse import ArgumentParser
 from os import PathLike
 from pathlib import Path
-import shutil as sh
-import json
 from typing import List
+
+from .utils import copy
 
 COPYLIST = Path().home() / 'copylist.json'
 
@@ -30,13 +31,6 @@ def search_copylist(filename: PathLike, key: str) -> List[Path]:
     else:
         print('key ({}) is not exists'.format(key))
         return None
-
-
-def copy(from_file: Path, to_file: Path):
-    if from_file.exists():
-        sh.copy(str(from_file), str(to_file))
-    else:
-        print('{} is not found'.format(from_file))
 
 
 def mymkdir():
