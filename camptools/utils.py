@@ -17,3 +17,10 @@ def copy(from_file: Path, to_file: Path):
     else:
         print('{} is not found'.format(from_file))
 
+
+def symlinkfile(from_path: Path, to_path: Path):
+    os.symlink(from_path, to_path, target_is_directory=False)
+
+
+def symlinkdir(from_path: Path, to_path: Path):
+    os.symlink(from_path, to_path, target_is_directory=True)
