@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.3.1",
+    version="0.4.0",
     install_requires=[
         'f90nml',
     ],
