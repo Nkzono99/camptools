@@ -30,4 +30,4 @@ def extent_sim():
         inp.nstep = args.nstep
 
     inp.save(to_dir / 'plasma.inp')
-    symlinkdir(from_dir / 'SNAPSHOT1', to_dir / 'SNAPSHOT0')
+    symlinkdir((from_dir / 'SNAPSHOT1').resolve(), to_dir / 'SNAPSHOT0')
