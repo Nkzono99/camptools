@@ -20,6 +20,7 @@ def extent_sim():
     
     from_dir = Path(args.from_directory)
     to_dir = Path(args.to_directory)
+    to_dir.mkdir(exist_ok=True)
 
     data = emout.Emout(from_dir)
     inp = data.inp
