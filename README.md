@@ -3,16 +3,18 @@ camphor用ツール
 
 # インストール
 ```
-  pip install git+https://github.com/Nkzono99/camptools.git
+  pip install camptools
 ```
 
 # コマンド一覧
 ```
-$ nmyqsub <job file> -m <message>
+$ nmyqsub <job file> -m <message> -d <directory>
   jobを投入し、job情報を記録する(job_status.sh, joblist.shなどに使用)
+  directoryを指定した場合、指定ディレクトリに移動後にqsubを実行
 
-$ myqsub <job file> -m <message>
+$ myqsub <job file> -m <message> -d <directory>
   jobを投入し、job情報を記録する(job_status.sh, joblist.shなどに使用)
+  directoryを指定した場合、指定ディレクトリに移動後にqsubを実行
   投入されるjobファイルは、パラメータファイルplasma.inpに応じてノード数を決定し置換したもの
   python環境にf90nmlが必要
   
@@ -34,5 +36,13 @@ $ jobhistory -n <num outputs> --correct_date
     *.o*ファイルから日付を読み取りjobに日付情報を付加する
     (この日付情報は保存されるため毎回呼ばなくても良い)
 
+$ extentsim <from-dir> <to-dir> --run
+  EMSESの継続シミュレーションを行う
+  from-dirに存在するmpiemses3D, job.sh, SNAPSHOT1, generate_xdmf.pyをto-dirにコピーする
+  runフラグを指定するとmyqsubによるジョブの投入まで行う
+
+$ mymkdir --key <key> <directory>
+  keyで指定した構成のディレクトリを作成する
+  ディレクトリ構成の設定は~/copylist.jsonに記載する
 ```
 
