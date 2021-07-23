@@ -66,7 +66,17 @@ def job_status():
     args = parse_args()
     jobs = create_jobs()
 
+    job_dict = JobDict()
+    job_dict.load()
+
     for job in jobs:
-        print('{}({})'.format(job.jobid, job.status))
+        if job.jobid in job_dict:
+            directory = job_dict[job.jobid].directory
+            message = job_dict[job.jobid].message
+        else:
+            directory = 'Not Found'
+            message = ''
+        print('{} ({}, {}) : {} : {}'.format(
+            job.jobid, job.status, job.elapse, directory, message))
         print(job.tail())
         print('')
