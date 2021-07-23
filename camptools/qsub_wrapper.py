@@ -2,6 +2,7 @@ import datetime
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
+import os
 
 import f90nml
 
@@ -57,11 +58,15 @@ def parse_args():
     parser.add_argument('--output', '-o', default='myjob.sh')
     parser.add_argument('--message', '-m', default='')
     parser.add_argument('--date', action='store_true')
+    parser.add_argument('--directory', '-d', default=None)
     return parser.parse_args()
 
 
 def nmyqsub():
     args = parse_args()
+
+    if args.directory is not None:
+        os.chdir(args.directory)
 
     jobfile = args.jobfile
 
@@ -76,6 +81,9 @@ def nmyqsub():
 
 def myqsub():
     args = parse_args()
+
+    if args.directory is not None:
+        os.chdir(args.directory)
 
     jobfile = args.jobfile
     create_emjob(args.inputfile, args.jobfile, args.output)
