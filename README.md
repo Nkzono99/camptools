@@ -44,5 +44,13 @@ $ extentsim <from-dir> <to-dir> --run
 $ mymkdir --key <key> <directory>
   keyで指定した構成のディレクトリを作成する
   ディレクトリ構成の設定は~/copylist.jsonに記載する
+
+$ cmdjob [-h] {register,create} ...
+$ cmdjob register -ug <usergroup> -s <system> --local
+  作成するjobの設定を登録する
+  localフラグを指定するとそのディレクトリ以下での設定が変更される
+$ cmdjob create <command> -o <output>
+  commandを実行するジョブファイルを作成する
+  出力ファイル名はoutputで指定(デフォルト: tmpjob.sh)
 ```
 
