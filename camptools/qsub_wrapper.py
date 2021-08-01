@@ -28,7 +28,7 @@ def create_emjob(inputfile, jobfile, outputfile):
     for i, line in enumerate(lines):
         if line.startswith('#QSUB -A'):
             lines[i] = '#QSUB -A p={}:t=1:c=64:m=90G\n'.format(nodes)
-        elif line.startswith('aprun'):
+        elif line.startswith('aprun') and 'mpiemses3D' in line:
             lines[i] = 'aprun -n {} -d 1 -N 64 ./mpiemses3D plasma.inp\n'.format(
                 procs)
 
