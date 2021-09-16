@@ -52,5 +52,17 @@ $ cmdjob register -ug <usergroup> -s <system> --local
 $ cmdjob create <command> -o <output>
   commandを実行するジョブファイルを作成する
   出力ファイル名はoutputで指定(デフォルト: tmpjob.sh)
+
+$ checkpoint {register, clear, list}
+$ checkpoint register -m <message>
+  カレントディレクトリをチェックポイントとして保存する
+$ checkpoint clear -a -i <index>
+  チェックポイントを削除する
+  -aフラグを指定するとすべてのチェックポイントを削除する
+  -iフラグを指定すると指定した番号をチェックポイントを削除する
+$ checkpoint list
+  チェックポイントのリストを表示する
+
+  
 ```
 
