@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
-from pathlib import Path
 
-from .jobs import JobDict
+from .jobs import JobHistoryManager
 from .jobs import create_submited_jobs
 from .utils import call
 
@@ -15,7 +14,7 @@ def joblist():
     args = parse_args_joblist()
     jobs = create_submited_jobs()
 
-    job_dict = JobDict()
+    job_dict = JobHistoryManager()
     job_dict.load()
 
     print('=' * 20)
@@ -47,7 +46,7 @@ def job_status():
     source = 'e' if args.error else 'o'
     jobs = create_submited_jobs(source=source)
 
-    job_dict = JobDict()
+    job_dict = JobHistoryManager()
     job_dict.load()
 
     for job in jobs:

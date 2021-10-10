@@ -13,7 +13,10 @@ class Singleton(object):
         return cls._instance
 
 
-class JobData:
+class JobHistoryData:
+    """Job history data.
+    """
+
     def __init__(self,
                  job_id: int,
                  directory: str,
@@ -25,7 +28,7 @@ class JobData:
         self.date = date
 
     @classmethod
-    def loads(cls, line):
+    def loads(cls, line: str) -> 'JobHistoryData':
         splited = line.split(',')
         if len(splited) != 4:
             return None
@@ -33,9 +36,9 @@ class JobData:
         directory = splited[1].strip()
         message = splited[2].strip()
         date = splited[3].strip()
-        return JobData(job_id, directory, message, date)
+        return JobHistoryData(job_id, directory, message, date)
 
-    def correct_date(self, force=False):
+    def correct_date(self, force: bool = False):
         if not force and len(self.date) > 0:
             return
 
@@ -55,7 +58,7 @@ class JobData:
         else:
             self.date = self.date or 'None'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}, {}, {}, {}'.format(
             self.job_id,
             self.directory,
@@ -64,17 +67,20 @@ class JobData:
         )
 
 
-class JobDict(Singleton):
+class JobHistoryManager(Singleton):
+    """Class to manage job history.
+    """
+
     def __init__(self):
         self.save_file = Path().home() / 'jobs.txt'
-        self.dict: typing.OrderedDict[int, JobData] = None
+        self.dict: typing.OrderedDict[int, JobHistoryData] = None
 
     def save_job(self,
                  job_id: str or int,
                  directory: str,
                  message: str = '',
                  date: str = ''):
-        job = JobData(job_id, directory, message, date)
+        job = JobHistoryData(job_id, directory, message, date)
         self.save_file.touch(exist_ok=True)
         with open(str(self.save_file), 'a', encoding='utf-8') as f:
             f.write('{}\n'.format(job))
@@ -83,7 +89,7 @@ class JobDict(Singleton):
         self.dict = OrderedDict()
         with open(str(self.save_file), 'r', encoding='utf-8') as f:
             for line in f:
-                job = JobData.loads(line)
+                job = JobHistoryData.loads(line)
                 if job is not None:
                     self.dict[job.job_id] = job
 
@@ -99,7 +105,7 @@ class JobDict(Singleton):
     def __iter__(self):
         return iter(self.dict)
 
-    def __getitem__(self, job_id: int) -> JobData:
+    def __getitem__(self, job_id: int) -> JobHistoryData:
         return self.dict[job_id]
 
 
