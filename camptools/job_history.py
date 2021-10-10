@@ -1,4 +1,4 @@
-from .jobs import JobDict
+from .jobs import JobHistoryManager
 from argparse import ArgumentParser
 
 
@@ -14,7 +14,7 @@ def parse_args():
 def job_history():
     args = parse_args()
 
-    job_dict = JobDict()
+    job_dict = JobHistoryManager()
     job_dict.load()
 
     if args.correct_date:

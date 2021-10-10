@@ -1,12 +1,12 @@
 import datetime
+import os
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
-import os
 
 import f90nml
 
-from .jobs import JobDict
+from .jobs import JobHistoryManager
 
 save_file = Path().home() / 'jobs.txt'
 
@@ -47,7 +47,11 @@ def qsub(filename):
     print(''.join(res_str))
 
     # extracte job_id from response
-    job_id = int(res_str[0].replace('.ja', '').strip())
+    job_id = int(res_str[0]
+                 .replace('.ja', '')
+                 .replace('.jb', '')
+                 .replace('.jc', '')
+                 .strip())
     return job_id
 
 
@@ -76,7 +80,7 @@ def nmyqsub():
     if args.date:
         date = str(datetime.datetime.now())
 
-    JobDict().save_job(job_id, Path('.').resolve(), args.message, date)
+    JobHistoryManager().save_job(job_id, Path('.').resolve(), args.message, date)
 
 
 def myqsub():
@@ -95,4 +99,4 @@ def myqsub():
     if args.date:
         date = str(datetime.datetime.now())
 
-    JobDict().save_job(job_id, Path('.').resolve(), args.message, date)
+    JobHistoryManager().save_job(job_id, Path('.').resolve(), args.message, date)
