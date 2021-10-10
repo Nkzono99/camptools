@@ -47,7 +47,11 @@ def qsub(filename):
     print(''.join(res_str))
 
     # extracte job_id from response
-    job_id = int(res_str[0].replace('.ja', '').strip())
+    job_id = int(res_str[0]
+                 .replace('.ja', '')
+                 .replace('.jb', '')
+                 .replace('.jc', '')
+                 .strip())
     return job_id
 
 
