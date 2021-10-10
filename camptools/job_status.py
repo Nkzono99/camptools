@@ -2,47 +2,18 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from .jobs import JobDict
+from .jobs import create_submited_jobs
 from .utils import call
 
 
-class JobInfo:
-    def __init__(self, tokens, encoding='utf-8'):
-        self.queue = tokens[0]
-        self.user = tokens[1]
-        self.jobid = int(tokens[2])
-        self.status = tokens[3]
-        self.proc = int(tokens[4])
-        self.thread = int(tokens[5])
-        self.core = int(tokens[6])
-        self.memory = int(tokens[7].replace('G', ''))
-        self.elapse = tokens[8]
-
-        self.encoding = encoding
-
-    def tail(self):
-        o_data, _ = call('qcat -o {} | tail'.format(self.jobid),
-                         encoding=self.encoding)
-        return o_data
-
-
-def create_jobs():
-    o_data, e_data = call('qs', encoding='utf-8')
-    lines = o_data.split('\n')
-    jobs = []
-    for line in lines[1:-1]:
-        tokens = line.strip().split()
-        jobs.append(JobInfo(tokens))
-    return jobs
-
-
-def parse_args():
+def parse_args_joblist():
     parser = ArgumentParser()
     return parser.parse_args()
 
 
 def joblist():
-    args = parse_args()
-    jobs = create_jobs()
+    args = parse_args_joblist()
+    jobs = create_submited_jobs()
 
     job_dict = JobDict()
     job_dict.load()
@@ -60,11 +31,21 @@ def joblist():
             job.jobid, job.status, job.elapse, directory, message))
 
     print('=' * 20)
+
+
+def parse_args_job_status():
+    parser = ArgumentParser()
+
+    parser.add_argument('--error', '-e', action='store_true')
+    parser.add_argument('--ntail', '-n', type=int, default=5)
+
+    return parser.parse_args()
 
 
 def job_status():
-    args = parse_args()
-    jobs = create_jobs()
+    args = parse_args_job_status()
+    source = 'e' if args.error else 'o'
+    jobs = create_submited_jobs(source=source)
 
     job_dict = JobDict()
     job_dict.load()
@@ -78,5 +59,5 @@ def job_status():
             message = ''
         print('{} ({}, {}) : {} : {}'.format(
             job.jobid, job.status, job.elapse, directory, message))
-        print(job.tail())
+        print(job.tail(args.ntail))
         print('')

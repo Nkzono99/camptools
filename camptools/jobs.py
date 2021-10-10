@@ -3,6 +3,7 @@ from collections import OrderedDict
 from .utils import call
 
 import typing
+from typing import List
 
 
 class Singleton(object):
@@ -100,3 +101,35 @@ class JobDict(Singleton):
 
     def __getitem__(self, job_id: int) -> JobData:
         return self.dict[job_id]
+
+
+class SubmitedJobInfo:
+    def __init__(self, tokens, source='o', encoding='utf-8'):
+        self.queue = tokens[0]
+        self.user = tokens[1]
+        self.jobid = int(tokens[2])
+        self.status = tokens[3]
+        self.proc = int(tokens[4])
+        self.thread = int(tokens[5])
+        self.core = int(tokens[6])
+        self.memory = int(tokens[7].replace('G', ''))
+        self.elapse = tokens[8]
+
+        self.source = source
+
+        self.encoding = encoding
+
+    def tail(self, ntail=5) -> str:
+        o_data, _ = call(f'qcat -{self.source} {self.jobid} | tail -n {ntail}',
+                         encoding=self.encoding)
+        return o_data
+
+
+def create_submited_jobs(source='o') -> List[SubmitedJobInfo]:
+    o_data, e_data = call('qs', encoding='utf-8')
+    lines = o_data.split('\n')
+    jobs = []
+    for line in lines[1:-1]:
+        tokens = line.strip().split()
+        jobs.append(SubmitedJobInfo(tokens, source=source))
+    return jobs
