@@ -30,12 +30,12 @@ def extent_sim():
         to_dir = Path(args.to_directory)
     else:
         index = 2
-        to_dir = Path(f'{str(from_dir)}_{index}')
+        to_dir = Path(f'{args.from_directory}_{index}')
         while to_dir.exists():
             from_dir = to_dir
 
             index += 1
-            to_dir = Path(f'{str(from_dir)}_{index}')      
+            to_dir = Path(f'{args.from_directory}_{index}')      
 
     to_dir.mkdir(exist_ok=True)
 
