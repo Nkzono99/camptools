@@ -11,7 +11,7 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument('from_directory')
-    parser.add_argument('to_directory')
+    parser.add_argument('to_directory', nargs='?', default=None)
     parser.add_argument('--nstep', '-n', type=int, default=None)
     parser.add_argument('--small', '-small', action='store_true')
     parser.add_argument('--run', action='store_true')
@@ -23,7 +23,20 @@ def extent_sim():
     args = parse_args()
 
     from_dir = Path(args.from_directory)
-    to_dir = Path(args.to_directory)
+    if not from_dir.exists():
+        exit(-1)
+
+    if args.to_directory:
+        to_dir = Path(args.to_directory)
+    else:
+        index = 2
+        to_dir = Path(f'{str(from_dir)}_{index}')
+        while to_dir.exists():
+            from_dir = to_dir
+
+            index += 1
+            to_dir = Path(f'{str(from_dir)}_{index}')      
+
     to_dir.mkdir(exist_ok=True)
 
     data = emout.Emout(from_dir)
