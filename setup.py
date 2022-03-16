@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.5.7",
+    version="0.6.0",
     install_requires=[
         'f90nml',
     ],
@@ -20,6 +20,9 @@ setup(
             'extentsim = camptools.extent_sim:extent_sim',
             'cmdjob = camptools.cmdjob:cmdjob',
             'checkpoint = camptools.checkpoint:main',
+            'simmanager = camptools.simmanager.simmanager:main',
+            'create_vdist = camptools.create_vdist:main',
+            'convunit = camptools.conversion_unit:main',
         ]
     },
     author="Nkzono",
