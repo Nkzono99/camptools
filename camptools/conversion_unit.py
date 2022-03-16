@@ -7,7 +7,7 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument('inp')
-    parser.add_argument('--dx', '-dx', required=True)
+    parser.add_argument('--dx', '-dx', required=True, type=float)
     parser.add_argument('--output', '-o', default=None)
 
     return parser.parse_args()
