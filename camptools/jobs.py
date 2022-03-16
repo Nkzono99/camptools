@@ -118,7 +118,7 @@ class SubmitedJobInfo:
         self.proc = int(tokens[4])
         self.thread = int(tokens[5])
         self.core = int(tokens[6])
-        self.memory = int(tokens[7].replace('G', ''))
+        self.memory = int(tokens[7].replace('G', '').replace('M', ''))
         self.elapse = tokens[8]
 
         self.source = source
