@@ -166,20 +166,24 @@ def solve_vdist(data: emout.Emout,
         .astype(endian+'d') \
         .tofile(str(filepath))
 
-    fig = plt.figure()
+    vmin = new_probs.min()
+    vmax = new_probs.max()
 
     def plot(ivy):
-        plt.cla()
+        plt.clf()
 
-        im = plt.imshow(new_probs[:, ivy, :, 0, 0, 0], origin='lower')
+        im = plt.imshow(new_probs[:, ivy, :, 0, 0, 0], origin='lower', vmin=vmin, vmax=vmax)
 
         plt.xlabel('VX')
         plt.ylabel('VZ')
         plt.title(f'VY = {ivy}')
         plt.colorbar()
 
-    ani = animation.FuncAnimation(fig, plot, range(NVY), interval=100)
-    ani.save("output.gif", writer=writer)
+    if output:
+        fig = plt.figure()
+
+        ani = animation.FuncAnimation(fig, plot, range(NVY), interval=100)
+        ani.save(output, writer=writer)
 
     nml = {
         'interp':
