@@ -90,11 +90,13 @@ def simmanager_extent(args: Namespace):
 def simmanager_interp(args: Namespace):
     base_directory_name = f'exp_{args.name}'
     latest_index = latest_directory_index(base_directory_name)
-    print(latest_index)
+
     new_directory = Path(f'{base_directory_name}_{latest_index+1}')
     new_directory.mkdir(exist_ok=True)
 
     from_dir = Path(args.from_dir)
+
+    data = emout.Emout(from_dir)
 
     inp = InpFile(from_dir / 'plasma.inp')
     inp = fork_inpFile(inp, args.nstep)
@@ -137,6 +139,8 @@ def simmanager_interp(args: Namespace):
         ispec = int(re.match(r'probs([0-9])_.+.inp',
                              probs_inp_path.name).group(1))
 
+        xinterp = probs_inp.interp_domain[0][1]
+        yinterp = probs_inp.interp_domain[1][1]
         zinterp = probs_inp.interp_domain[2][1]
 
         probs_inp.interp_domain[0][0] = 0
@@ -180,7 +184,8 @@ def simmanager_interp(args: Namespace):
         inp.setlist('pclinj', 'interp_param_files',
                     probs_inp_path.name, start_index=index)
 
-        bc = unit_to.E.trans(unit_from.E.reverse(probs_inp.boundary_condition))
+        ez = data.ez[args.istep, zinterp, yinterp, xinterp]
+        bc = unit_to.E.trans(unit_from.E.reverse(ez))
         inp.nml['system'].start_index['boundary_conditions'] = [2, 3]
         inp.nml['system']['boundary_conditions'] = [[bc]]
 
@@ -231,6 +236,7 @@ def main():
         '--hole', '-hole', type=int, nargs=3, help='wx, wy, zdepth', required=True)
     subparser_interp.add_argument(
         '--nxy', '-nxy', type=int, nargs=2, required=True)
+    subparser_interp.add_argument('--istep', '-istep', type=int, default=-1)
     subparser_interp.set_defaults(handler=simmanager_interp)
 
     subparser_run = subparsers.add_parser('run')
