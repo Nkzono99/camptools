@@ -23,6 +23,31 @@ from f90nml import Namelist
 from ..utils import call, copy, symlinkdir
 from .utils import (create_directory, create_inpFile, fork_inpFile,
                     latest_directory_index)
+from dataclasses import dataclass
+import math
+
+
+@dataclass
+class EmissionSurface:
+    nemd: int
+    curf: float
+    xmin: float
+    xmax: float
+    ymin: float
+    ymax: float
+    zmin: float
+    zmax: float
+
+    def saveinp(self, inp: InpFile, index: int):
+        inp.setlist('emissn', 'nemd', self.nemd, start_index=index)
+        inp.setlist('emissn', 'curfs', self.curf, start_index=index)
+        inp.setlist('emissn', 'xmine', self.xmin, start_index=index)
+        inp.setlist('emissn', 'xmaxe', self.xmax, start_index=index)
+        inp.setlist('emissn', 'ymine', self.ymin, start_index=index)
+        inp.setlist('emissn', 'ymaxe', self.ymax, start_index=index)
+        inp.setlist('emissn', 'zmine', self.zmin, start_index=index)
+        inp.setlist('emissn', 'zmaxe', self.zmax, start_index=index)
+
 
 
 def extent_sim(from_dir: Path, to_dir: Path, nstep: int, params: Dict[Tuple[Any], Any] = {}):
@@ -105,30 +130,75 @@ def simmanager_interp(args: Namespace):
     unit_to = Units(args.dx, inp.convkey.to_c)
     inp.conversion(unit_from, unit_to)
 
-    # Shift emission surface index
-    if 'nepl' in inp.emissn:
-        if 'xmine' in inp.emissn:
-            inp.setlist('emissn', 'xmine', inp.xmine, start_index=inp.nspec+1)
-        if 'xmaxe' in inp.emissn:
-            inp.setlist('emissn', 'xmaxe', inp.xmaxe, start_index=inp.nspec+1)
-        if 'ymine' in inp.emissn:
-            inp.setlist('emissn', 'ymine', inp.ymine, start_index=inp.nspec+1)
-        if 'ymaxe' in inp.emissn:
-            inp.setlist('emissn', 'ymaxe', inp.ymaxe, start_index=inp.nspec+1)
-        if 'zmine' in inp.emissn:
-            inp.setlist('emissn', 'zmine', inp.zmine, start_index=inp.nspec+1)
-        if 'zmaxe' in inp.emissn:
-            inp.setlist('emissn', 'zmaxe', inp.zmaxe, start_index=inp.nspec+1)
-        if 'curfs' in inp.emissn:
-            inp.setlist('emissn', 'curfs', inp.curfs, start_index=inp.nspec+1)
+    inp.nx, inp.ny = args.nxy
+    inp.zssurf = args.zssurf
+    inp.nepl[0] = inp.nepl[0]
+    inp.nepl[1] = inp.nepl[1]
 
-    wx, wy, zdepth = args.hole
-    inp.setlist('ptcond', 'xlrechole', [inp.nx//2-wx/2]*2)
-    inp.setlist('ptcond', 'xurechole', [inp.nx//2+wx/2]*2)
-    inp.setlist('ptcond', 'ylrechole', [inp.ny//2-wy/2]*2)
-    inp.setlist('ptcond', 'yurechole', [inp.ny//2+wy/2]*2)
-    inp.setlist('ptcond', 'zlrechole', [args.zssurf-zdepth]*2)
-    inp.setlist('ptcond', 'zurechole', [args.zssurf]*2)
+    if args.hole:
+        wx, wy, zdepth = args.hole
+
+        hole_xmin = (inp.nx - wx) / 2
+        hole_xmax = (inp.nx + wx) / 2
+        hole_ymin = (inp.ny - wy) / 2
+        hole_ymax = (inp.ny + wy) / 2
+        hole_zmin = inp.zssurf - zdepth
+        hole_zmax = inp.zssurf
+
+        emit_x_min = hole_xmin + zdepth * math.tan(zenith_rad)
+        if zenith_rad == 0:
+            emit_z_min = math.inf
+        else:
+            emit_z_min = max(inp.zssurf - wx / math.tan(zenith_rad), hole_zmin)
+
+        inp.setlist('ptcond', 'xlrechole', [inp.nx//2-wx/2]*2)
+        inp.setlist('ptcond', 'xurechole', [inp.nx//2+wx/2]*2)
+        inp.setlist('ptcond', 'ylrechole', [inp.ny//2-wy/2]*2)
+        inp.setlist('ptcond', 'yurechole', [inp.ny//2+wy/2]*2)
+        inp.setlist('ptcond', 'zlrechole', [args.zssurf-zdepth]*2)
+        inp.setlist('ptcond', 'zurechole', [args.zssurf]*2)
+        
+
+    if inp.nspec == 3:
+        curf = inp.curf
+
+        # 照射角を取得
+        zenith_deg = float(inp.vdthz[0])
+        zenith_rad = math.radians((zenith_deg + 360) % 360)
+
+        # 光電子電流を計算
+        curf_horizon = curf * abs(math.cos(zenith_rad))
+        curf_vertical = curf * abs(math.sin(zenith_rad))
+
+        
+        esurfs = []
+        if args.hole:
+            wx, wy, zdepth = args.hole
+
+            esurfs.append(EmissionSurface(3, curf_horizon,
+                                            0, hole_xmin, 0, inp.ny, inp.zssurf, inp.zssurf))
+            esurfs.append(EmissionSurface(3, curf_horizon,
+                                            hole_xmin, hole_xmax, 0, hole_ymin, inp.zssurf, inp.zssurf))
+            esurfs.append(EmissionSurface(3, curf_horizon,
+                                            hole_xmax, inp.nx, 0, inp.ny, inp.zssurf, inp.zssurf))
+            esurfs.append(EmissionSurface(3, curf_horizon,
+                                            hole_xmin, hole_xmax, hole_ymax, inp.ny, inp.zssurf, inp.zssurf))
+            if emit_x_min < hole_xmax:
+                esurfs.append(EmissionSurface(3, curf_horizon,
+                                                emit_x_min, hole_xmax, hole_ymin, hole_ymax, hole_zmin, hole_zmin))
+            if emit_z_min < inp.zssurf:
+                esurfs.append(EmissionSurface(-1, curf_vertical,
+                                                hole_xmax, hole_xmax, hole_ymin, hole_ymax, emit_z_min, inp.zssurf))
+        else:
+            esurfs.append(EmissionSurface(3, curf_horizon,
+                                            0, inp.nx, 0, inp.ny, inp.zssurf, inp.zssurf))
+
+        nepl = len(esurfs) + 1
+        inp.setlist('emissn', 'nepl', nepl, start_index=3)
+
+        for i, esurf in enumerate(esurfs):
+            esurf.saveinp(inp, index=inp.nspec+i+1) # 1: SWE-interp, 2: SWI-interp, 3: PE-interp, 4~: PE-emit
+
 
     if 'pclinj' not in inp.nml:
         inp.nml['pclinj'] = Namelist()
@@ -177,7 +247,6 @@ def simmanager_interp(args: Namespace):
 
         # Emmision surface settings.
         index = ispec+1
-        inp.nepl[ispec] = inp.nepl[ispec]+1
         inp.setlist('emissn', 'nemd', [-3], start_index=index)
         inp.setlist('emissn', 'curfs', [curf], start_index=index)
 
@@ -189,9 +258,7 @@ def simmanager_interp(args: Namespace):
         inp.nml['system'].start_index['boundary_conditions'] = [2, 3]
         inp.nml['system']['boundary_conditions'] = [[bc]]
 
-    inp.nx, inp.ny = args.nxy
     inp.nz = inp.zssurf + unit_from.dx*(zinterp - inp.zssurf)/args.dx
-    inp.zssurf = args.zssurf
     inp.save(new_directory / 'plasma.inp')
 
     copy(from_dir / 'job.sh', new_directory / 'job.sh')
@@ -233,7 +300,7 @@ def main():
     subparser_interp.add_argument('--dx', '-dx', type=float, required=True)
     subparser_interp.add_argument('--zssurf', '-zs', type=int, required=True)
     subparser_interp.add_argument(
-        '--hole', '-hole', type=int, nargs=3, help='wx, wy, zdepth', required=True)
+        '--hole', '-hole', type=int, nargs=3, help='wx, wy, zdepth', default=None)
     subparser_interp.add_argument(
         '--nxy', '-nxy', type=int, nargs=2, required=True)
     subparser_interp.add_argument('--istep', '-istep', type=int, default=-1)
