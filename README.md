@@ -62,7 +62,15 @@ $ checkpoint clear -a -i <index>
   -iフラグを指定すると指定した番号をチェックポイントを削除する
 $ checkpoint list
   チェックポイントのリストを表示する
-
   
+$ filesync {lock, wait, notify}
+  システム内で同期を取るためのコマンド.
+$ filesync lock <key>
+  <key>名のロックを確保する (~/.camptools内にロック情報を書き込む)
+$ filesync wait <key>
+  <key>名のロックが確保されていたら待機する
+$ filesync notify <key>
+  <key>名のロックを解放する (~/.camptoolsからロック情報を削除する)
+
 ```
 
