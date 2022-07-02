@@ -46,14 +46,19 @@ def extent_sim():
     if args.nstep is not None:
         inp.nstep = args.nstep
 
-    inp.save(to_dir / 'plasma.inp')
-    symlinkdir((from_dir / 'SNAPSHOT1').resolve(), to_dir / 'SNAPSHOT0')
-
     # 最低限の要素の複製を行う場合以下は無視する
     if not args.small:
         copy(from_dir / 'job.sh', to_dir / 'job.sh')
         copy(from_dir / 'mpiemses3D', to_dir / 'mpiemses3D')
         copy(from_dir / 'generate_xdmf3.py', to_dir / 'generate_xdmf3.py')
+
+        for bash in from_dir.glob('*.sh'):
+            copy(bash, to_dir)
+        for inp_file in from_dir.glob('*.inp'):
+            copy(inp_file, to_dir)
+
+    inp.save(to_dir / 'plasma.inp')
+    symlinkdir((from_dir / 'SNAPSHOT1').resolve(), to_dir / 'SNAPSHOT0')
 
     if args.run:
         os.chdir(to_dir.resolve())

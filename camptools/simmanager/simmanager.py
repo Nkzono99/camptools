@@ -132,8 +132,9 @@ def simmanager_interp(args: Namespace):
 
     inp.nx, inp.ny = args.nxy
     inp.zssurf = args.zssurf
-    inp.nepl[0] = inp.nepl[0]
-    inp.nepl[1] = inp.nepl[1]
+    inp.setlist('emissn', 'nepl', [1, 1], start_index=1)
+    if args.nodes:
+        inp.setlist('tmgrid', 'nodes', args.nodes)
 
     if args.hole:
         wx, wy, zdepth = args.hole
@@ -144,6 +145,9 @@ def simmanager_interp(args: Namespace):
         hole_ymax = (inp.ny + wy) / 2
         hole_zmin = inp.zssurf - zdepth
         hole_zmax = inp.zssurf
+
+        zenith_deg = float(inp.vdthz[0])
+        zenith_rad = math.radians((zenith_deg + 360) % 360)
 
         emit_x_min = hole_xmin + zdepth * math.tan(zenith_rad)
         if zenith_rad == 0:
@@ -160,7 +164,7 @@ def simmanager_interp(args: Namespace):
         
 
     if inp.nspec == 3:
-        curf = inp.curf
+        curf = inp.curf[0]
 
         # 照射角を取得
         zenith_deg = float(inp.vdthz[0])
@@ -209,9 +213,9 @@ def simmanager_interp(args: Namespace):
         ispec = int(re.match(r'probs([0-9])_.+.inp',
                              probs_inp_path.name).group(1))
 
-        xinterp = probs_inp.interp_domain[0][1]
-        yinterp = probs_inp.interp_domain[1][1]
-        zinterp = probs_inp.interp_domain[2][1]
+        xinterp = int(probs_inp.interp_domain[0][1])
+        yinterp = int(probs_inp.interp_domain[1][1])
+        zinterp = int(probs_inp.interp_domain[2][1])
 
         probs_inp.interp_domain[0][0] = 0
         probs_inp.interp_domain[0][1] = inp.nx
@@ -259,6 +263,18 @@ def simmanager_interp(args: Namespace):
         inp.nml['system']['boundary_conditions'] = [[bc]]
 
     inp.nz = inp.zssurf + unit_from.dx*(zinterp - inp.zssurf)/args.dx
+
+    for probs_inp_path in Path(from_dir).glob(f'prob*_{args.prob_name}.inp'):
+        probs_inp = InpFile(probs_inp_path)
+        probs_inp.interp_domain[2][0] = inp.nz
+        probs_inp.interp_domain[2][1] = inp.nz
+
+    npin = inp.nx*inp.ny*inp.nz*args.dnsf
+
+    inp.setlist('intp', 'npin', [npin, npin])
+    if inp.nspec == 3:
+        inp.setlist('intp', 'np', [npin*args.pebuf], start_index=3)
+
     inp.save(new_directory / 'plasma.inp')
 
     copy(from_dir / 'job.sh', new_directory / 'job.sh')
@@ -304,6 +320,9 @@ def main():
     subparser_interp.add_argument(
         '--nxy', '-nxy', type=int, nargs=2, required=True)
     subparser_interp.add_argument('--istep', '-istep', type=int, default=-1)
+    subparser_interp.add_argument('--nodes', '-nodes', type=int, nargs=3, default=None)
+    subparser_interp.add_argument('--dnsf', '-dnsf', type=int, default=40)
+    subparser_interp.add_argument('--pebuf', '-pebuf', type=int, default=10)
     subparser_interp.set_defaults(handler=simmanager_interp)
 
     subparser_run = subparsers.add_parser('run')

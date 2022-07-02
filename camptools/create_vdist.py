@@ -9,7 +9,7 @@ from emout.utils import InpFile, UnitConversionKey
 from matplotlib import animation
 import numpy as np
 from vdsolver.tools.emses import PhaseGrid, VSolveTarget
-from vdsolver.tools.emses.utils import create_default_simulator
+from vdsolver.tools.emses.utils import create_default_simulator, create_default_pe_simulator
 import matplotlib.pyplot as plt
 
 
@@ -63,11 +63,20 @@ def solve_vdist(data: emout.Emout,
     NVY = phase_grid.vylim.num
     NVZ = phase_grid.vzlim.num
 
-    sim = create_default_simulator(data,
-                                   ispec,
-                                   istep,
-                                   use_si=False,
-                                   use_hole=False)
+    if ispec in (0, 1):
+        sim = create_default_simulator(data,
+                                       ispec,
+                                       istep,
+                                       use_si=False,
+                                       use_hole=False)
+    elif ispec in (2, ):
+        sim = create_default_pe_simulator(data,
+                                          ispec,
+                                          istep,
+                                          use_si=False,
+                                          use_hole=False)
+    else:
+        raise Exception('ispec is not 0 or 1 or 2.')
 
     if xy_iso:
         vxs, vxe, nvx = phase_grid.vxlim.tolist()
@@ -172,7 +181,8 @@ def solve_vdist(data: emout.Emout,
     def plot(ivy):
         plt.clf()
 
-        im = plt.imshow(new_probs[:, ivy, :, 0, 0, 0], origin='lower', vmin=vmin, vmax=vmax)
+        im = plt.imshow(new_probs[:, ivy, :, 0, 0, 0],
+                        origin='lower', vmin=vmin, vmax=vmax)
 
         plt.xlabel('VX')
         plt.ylabel('VZ')
