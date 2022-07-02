@@ -73,6 +73,7 @@ class JobHistoryManager(Singleton):
 
     def __init__(self):
         self.save_file = Path().home() / 'jobs.txt'
+        self.save_file.touch(exist_ok=True)
         self.dict: typing.OrderedDict[int, JobHistoryData] = None
 
     def save_job(self,
@@ -81,7 +82,6 @@ class JobHistoryManager(Singleton):
                  message: str = '',
                  date: str = ''):
         job = JobHistoryData(job_id, directory, message, date)
-        self.save_file.touch(exist_ok=True)
         with open(str(self.save_file), 'a', encoding='utf-8') as f:
             f.write('{}\n'.format(job))
 
