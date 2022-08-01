@@ -48,7 +48,7 @@ def search_rscgrp_in_system_b(nodes, elapse):
         return 'error'
 
 
-def create_tmpjob(jobfile, outputfile, procs=None, elapse=None, system='a', replaces=[]):
+def create_tmpjob(jobfile, outputfile, procs=None, elapse=None, rscgrp=None, system='a', replaces=[]):
     with open(jobfile, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
@@ -66,7 +66,9 @@ def create_tmpjob(jobfile, outputfile, procs=None, elapse=None, system='a', repl
             if m:
                 elapse = int(m.group(1))
 
-    if system == 'a':
+    if rscgrp is not None:
+        pass
+    elif system == 'a':
         rscgrp = search_rscgrp_in_system_a(nodes, elapse)
     else:  # if sytem == 'b'
         rscgrp = search_rscgrp_in_system_b(nodes, elapse)
@@ -118,6 +120,7 @@ def parse_args():
     parser.add_argument('--system', default='a')
     parser.add_argument('--procs', '-proc', type=int, default=None)
     parser.add_argument('--elapse', '-elapse', type=int, default=None)
+    parser.add_argument('--rscgrp', '-rscgrp', default=None)
     return parser.parse_args()
 
 
@@ -130,7 +133,7 @@ def nmypjsub():
     jobfile = args.jobfile
 
     create_tmpjob(args.jobfile, args.output, system=args.system,
-                  procs=args.procs, elapse=args.elapse)
+                  procs=args.procs, elapse=args.elapse, rscgrp=args.rscgrp)
     jobfile = args.output
 
     job_id = pjsub(jobfile)
@@ -159,7 +162,7 @@ def mypjsub():
     procs = calc_procs(args.inputfile)
 
     create_tmpjob(args.jobfile, args.output, system=args.system,
-                  procs=procs, elapse=args.elapse,
+                  procs=procs, elapse=args.elapse, rscgrp=args.rscgrp, 
                   replaces=[
                       replace_mpiexec
                   ])
