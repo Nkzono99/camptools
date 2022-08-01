@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.7.0",
+    version="0.8.0",
     install_requires=[
         'f90nml',
     ],
@@ -24,6 +24,8 @@ setup(
             'create_vdist = camptools.create_vdist:main',
             'convunit = camptools.conversion_unit:main',
             'filesync = camptools.filesync:main',
+            'nmypjsub = camptools.grand.pjsub_wrapper:nmypjsub',
+            'mypjsub = camptools.grand.pjsub_wrapper:mypjsub'
         ]
     },
     author="Nkzono",
