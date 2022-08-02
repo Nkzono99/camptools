@@ -63,4 +63,4 @@ def extent_sim():
 
     if args.run:
         os.chdir(to_dir.resolve())
-        call(f'{args.sub} job.sh')
+        call(f'{args.submit} job.sh')
