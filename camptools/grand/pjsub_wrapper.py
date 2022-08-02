@@ -82,7 +82,7 @@ def create_tmpjob(jobfile, outputfile, procs=None, elapse=None, rscgrp=None, sys
             lines[i] = f'#PJM --mpi proc={procs}\n'
         else:
             for rep in replaces:
-                line[i] = rep(line[i], procs, nodes, elapse, system)
+                lines[i] = rep(line, procs, nodes, elapse, system)
 
     with open(outputfile, 'w', encoding='utf-8') as f:
         f.writelines(lines)
