@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--nstep', '-n', type=int, default=None)
     parser.add_argument('--small', '-small', action='store_true')
     parser.add_argument('--run', action='store_true')
+    parser.add_argument('--submit', '-s', default='mypjsub')
 
     return parser.parse_args()
 
@@ -62,4 +63,4 @@ def extent_sim():
 
     if args.run:
         os.chdir(to_dir.resolve())
-        call('myqsub job.sh')
+        call(f'{args.sub} job.sh')
