@@ -55,7 +55,6 @@ def create_tmpjob(job_filepath: PathLike, tmpjob_filepath: PathLike,
             jobfile.queue_name = jobqueue.minimum_queue_name(jobfile.nprocs, 
                                                                   jobfile.exec_time_hour)
 
-    jobfile.finalize_with_nprocs_per_node()
     jobfile.save(tmpjob_filepath)
 
 

@@ -53,11 +53,8 @@ class LaurelJobFile(JobFile):
     @nprocs.setter
     def nprocs(self, nprocs: int):
         p = re.compile(r'#SBATCH --rsc p=(\d+)')
-        p_srun = re.compile(r'srun\s+-n\s+(\d+)\s+--ntasks-per-node')
         for i in range(len(self.lines)):
             self.lines[i] = p.sub(f'#SBATCH --rsc p={nprocs}', self.lines[i])
-            self.lines[i] = p_srun.sub(
-                f'srun -n {nprocs} --ntasks-per-node', self.lines[i])
 
     @property
     def exec_time_hour(self):
@@ -94,12 +91,3 @@ class LaurelJobFile(JobFile):
         for i in range(len(self.lines)):
             self.lines[i] = p.sub(f'#SBATCH -p {queue_name}', self.lines[i])
 
-    def finalize_with_nprocs_per_node(self, nprocs_per_node: int = 32):
-        nprocs = self.nprocs
-        self.nprocs = nprocs//nprocs_per_node*40 if nprocs > 40 else nprocs
-
-        p = re.compile(r'--ntasks-per-node=(\d+)')
-        p_srun = re.compile(r'srun\s+-n\s+(\d+)\s+--ntasks-per-node=(\d+)')
-        for i in range(len(self.lines)):
-            self.lines[i] = p_srun.sub(
-                f'srun -n {nprocs} --ntasks-per-node={min(nprocs, nprocs_per_node)}', self.lines[i])
