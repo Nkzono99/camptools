@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.9.1",
+    version="0.9.2",
     install_requires=[
         'f90nml',
     ],
@@ -28,6 +28,7 @@ setup(
             'mypjsub = camptools.grand.pjsub_wrapper:mypjsub',
             'nmysbatch = camptools.job_scheduler.sbatch_wrapper:nmysbatch',
             'mysbatch = camptools.job_scheduler.sbatch_wrapper:mysbatch',
+            'latestjob = camptools.latest_job: main',
         ]
     },
     author="Nkzono",
