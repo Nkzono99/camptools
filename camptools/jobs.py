@@ -1,9 +1,10 @@
-from pathlib import Path
-from collections import OrderedDict
-from .utils import call
-
+import re
 import typing
+from collections import OrderedDict
+from pathlib import Path
 from typing import List
+
+from .utils import call
 
 
 class Singleton(object):
@@ -14,22 +15,17 @@ class Singleton(object):
 
 
 class JobHistoryData:
-    """Job history data.
-    """
+    """Job history data."""
 
-    def __init__(self,
-                 job_id: int,
-                 directory: str,
-                 message: str = '',
-                 date: str = ''):
+    def __init__(self, job_id: int, directory: str, message: str = "", date: str = ""):
         self.job_id = job_id
         self.directory = directory
         self.message = message
         self.date = date
 
     @classmethod
-    def loads(cls, line: str) -> 'JobHistoryData':
-        splited = line.split(',')
+    def loads(cls, line: str) -> "JobHistoryData":
+        splited = line.split(",")
         if len(splited) != 4:
             return None
         job_id = int(splited[0].strip())
@@ -43,23 +39,23 @@ class JobHistoryData:
             return
 
         path = Path(self.directory)
-        output_files = list(path.glob('*.o{}'.format(self.job_id)))
+        output_files = list(path.glob("*.o{}".format(self.job_id)))
         if len(output_files) == 0:
-            self.date = 'None'
+            self.date = "None"
             return
 
         output_file = output_files[0]
-        o_data, _ = call('tail {} -n 30'.format(output_file.resolve()))
+        o_data, _ = call("tail {} -n 30".format(output_file.resolve()))
         lines = o_data.splitlines()
         for line in lines:
-            if 'Resource Usage on' in line:
-                self.date = line.replace('Resource Usage on', '').strip()
+            if "Resource Usage on" in line:
+                self.date = line.replace("Resource Usage on", "").strip()
                 break
         else:
-            self.date = self.date or 'None'
+            self.date = self.date or "None"
 
     def __str__(self) -> str:
-        return '{}, {}, {}, {}'.format(
+        return "{}, {}, {}, {}".format(
             self.job_id,
             self.directory,
             self.message,
@@ -68,26 +64,23 @@ class JobHistoryData:
 
 
 class JobHistoryManager(Singleton):
-    """Class to manage job history.
-    """
+    """Class to manage job history."""
 
     def __init__(self):
-        self.save_file = Path().home() / 'jobs.txt'
+        self.save_file = Path().home() / "jobs.txt"
         self.save_file.touch(exist_ok=True)
         self.dict: typing.OrderedDict[int, JobHistoryData] = None
 
-    def save_job(self,
-                 job_id: str or int,
-                 directory: str,
-                 message: str = '',
-                 date: str = ''):
+    def save_job(
+        self, job_id: str or int, directory: str, message: str = "", date: str = ""
+    ):
         job = JobHistoryData(job_id, directory, message, date)
-        with open(str(self.save_file), 'a', encoding='utf-8') as f:
-            f.write('{}\n'.format(job))
+        with open(str(self.save_file), "a", encoding="utf-8") as f:
+            f.write("{}\n".format(job))
 
     def load(self):
         self.dict = OrderedDict()
-        with open(str(self.save_file), 'r', encoding='utf-8') as f:
+        with open(str(self.save_file), "r", encoding="utf-8") as f:
             for line in f:
                 job = JobHistoryData.loads(line)
                 if job is not None:
@@ -98,9 +91,9 @@ class JobHistoryManager(Singleton):
             job.correct_date(force=force)
 
     def save(self):
-        with open(str(self.save_file), 'w', encoding='utf-8') as f:
+        with open(str(self.save_file), "w", encoding="utf-8") as f:
             for job in self.dict.values():
-                f.write('{}\n'.format(job))
+                f.write("{}\n".format(job))
 
     def __iter__(self):
         return iter(self.dict)
@@ -110,30 +103,34 @@ class JobHistoryManager(Singleton):
 
 
 class SubmitedJobInfo:
-    def __init__(self, tokens, source='o', encoding='utf-8'):
+    def __init__(self, tokens, source="o", encoding="utf-8"):
         self.queue = tokens[0]
         self.user = tokens[1]
         self.jobid = int(tokens[2])
         self.status = tokens[3]
         self.proc = int(tokens[4])
-        self.thread = int(tokens[5])
-        self.core = int(tokens[6])
-        self.memory = int(tokens[7].replace('G', '').replace('M', ''))
-        self.elapse = tokens[8]
+        self.core = int(tokens[5])
+        self.memory = int(tokens[6].replace("G", "").replace("M", ""))
+
+        m = re.match("(.+)\((.+)\)", tokens[7])
+        self.elapse = m.group(1)
+        self.limit = m.group(2)
 
         self.source = source
 
         self.encoding = encoding
 
     def tail(self, ntail=5) -> str:
-        o_data, _ = call(f'qcat -{self.source} {self.jobid} | tail -n {ntail}',
-                         encoding=self.encoding)
+        o_data, _ = call(
+            f"qcat -{self.source} {self.jobid} | tail -n {ntail}",
+            encoding=self.encoding,
+        )
         return o_data
 
 
-def create_submited_jobs(source='o') -> List[SubmitedJobInfo]:
-    o_data, e_data = call('qs', encoding='utf-8')
-    lines = o_data.split('\n')
+def create_submited_jobs(source="o") -> List[SubmitedJobInfo]:
+    o_data, e_data = call("qs", encoding="utf-8")
+    lines = o_data.split("\n")
     jobs = []
     for line in lines[1:-1]:
         tokens = line.strip().split()

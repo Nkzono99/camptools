@@ -1,11 +1,14 @@
 import os
+import re
 import shutil as sh
 import subprocess
 from argparse import ArgumentParser
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import emout
 
+from .jobs import create_submited_jobs
 from .utils import call
 
 
@@ -44,9 +47,34 @@ def main():
     if len(steps) == 0:
         return
 
-    print(
-        f"{steps[-1]} / {data.inp.nstep} ({steps[-1]/float(data.inp.nstep)*100: .2f} %)"
-    )
+    job_elapsed_rate = max(steps[-1] / float(data.inp.nstep), 1e-8)
+    print(f"{steps[-1]} / {data.inp.nstep} ({job_elapsed_rate*100: .2f} %)")
+
+    # 予想時間を計算する
+    m = re.match(r"stdout\.([0-9]+)\.log", str(latest_stdout_path))
+    if m is None:
+        return
+    job_id = int(m.group(1))
+
+    jobs = create_submited_jobs()
+    jobs = [job for job in jobs if job.jobid == job_id]
+    if len(jobs) == 1:
+        job = jobs[0]
+
+    hours, minutes, seconds = map(int, job.elapse.split(":"))
+    elapsed = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    estimates = elapsed / job_elapsed_rate
+
+    def timedelta2str(dt):
+        days = dt.days
+        hours, remainder = divmod(dt.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        if days > 0:
+            return f"{days:01d}-{hours:02d}:{minutes:02d}:{seconds:02d}"
+        else:
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    print(f"{timedelta2str(elapsed)} / {timedelta2str(estimates)}")
 
 
 def parse_job_id(filepath):
