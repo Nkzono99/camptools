@@ -1,0 +1,59 @@
+start         : "!!>" statement
+
+?statement    : definition | assignment | convert_expr
+
+
+// パラメータのマクロ的定義
+definition    : define_expr
+define_expr   : define | define_list
+define        : symbol "=" value
+define_list   : symbol "=" values
+
+
+// マクロ内で用いる変数代入
+assignment    : "var" symbol "=" value
+
+
+// 複雑なパラメータ変換を行う場合の関数呼び出し型マクロ定義
+convert_expr  : function_name "(" (arguments ",")? keyword_arguments? ")"
+function_name : symbol
+
+arguments     : [arg ("," arg)*]
+arg           : value
+
+keyword_arguments : [kwarg ("," kwarg)*]
+kwarg         : kwarg_name "=" value
+
+
+// 細かいトークンの記述
+?values       : [value ("," value)+]
+?value        : string | num_expr
+kwarg_name    : symbol
+?num_expr     : term | num_add | num_sub
+num_add       : num_expr "+" term
+num_sub       : num_expr "-" term
+
+?term         : factor | num_mul | num_div
+num_mul       : term "*" factor
+num_div       : term "/" factor
+factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | num_to_int
+num_sin       : "sin" "(" num_expr ")"
+num_cos       : "cos" "(" num_expr ")"
+num_to_int    : "int" "(" num_expr ")"
+number        : integer | float
+
+?variable_expr  : variable | variable_element
+variable_element: variable_expr "[" integer "]"
+
+variable      : symbol
+symbol        : CNAME
+string        : ESCAPED_STRING
+integer       : SIGNED_INT
+float         : SIGNED_FLOAT
+
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_INT
+%import common.SIGNED_FLOAT
+%import common.WS
+%ignore WS
