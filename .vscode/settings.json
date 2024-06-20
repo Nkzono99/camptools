@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.rmd": "markdown",
+        "*.tcc": "cpp",
+        "functional": "cpp",
+        "limits": "cpp",
+        "*.ttml": "xml",
+        "*.ttss": "css"
+    }
+}

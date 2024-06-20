@@ -5,7 +5,7 @@ long_description = open('README.md', 'r', encoding='utf-8').read()
 
 setup(
     name="camptools",
-    version="0.9.3",
+    version="0.10.3",
     install_requires=[
         'f90nml',
     ],
@@ -29,6 +29,7 @@ setup(
             'nmysbatch = camptools.job_scheduler.sbatch_wrapper:nmysbatch',
             'mysbatch = camptools.job_scheduler.sbatch_wrapper:mysbatch',
             'latestjob = camptools.latest_job: main',
+            'preinp = camptools.preinp: main'
         ]
     },
     author="Nkzono",
@@ -44,4 +45,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    include_package_data=True,
 )
