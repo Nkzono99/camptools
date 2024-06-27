@@ -182,6 +182,7 @@ def main():
     inp_transformer = CallFunctionTransformer(inp, functions)
 
     with open(preinp_path, encoding="utf-8") as f:
+        chained_line = ''
         for line in f:
             if line.strip().startswith("&"):
                 group = line.strip().replace("&", "")
@@ -191,8 +192,14 @@ def main():
                 inp_transformer.set_current_group(None)
 
             elif line.strip().startswith("!!>"):
-                tree = lark_parser.parse(line)
+                line = line.replace('!!>', '')
+                chained_line += line.replace('\\', '')
+
+                if line.strip().endswith('\\'):
+                    continue
+                tree = lark_parser.parse(chained_line)
                 inp_transformer.transform(tree)
+                chained_line = ''
 
     inp.save(directory / args.output)
 

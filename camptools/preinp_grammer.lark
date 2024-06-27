@@ -1,4 +1,4 @@
-start         : "!!>" statement
+start         : statement
 
 ?statement    : definition | assignment | convert_expr
 
