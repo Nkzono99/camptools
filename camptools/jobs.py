@@ -134,5 +134,9 @@ def create_submited_jobs(source="o") -> List[SubmitedJobInfo]:
     jobs = []
     for line in lines[1:-1]:
         tokens = line.strip().split()
+
+        if len(tokens) == 9:
+            tokens = tokens[:7] + [tokens[7] + tokens[8].strip()]
+
         jobs.append(SubmitedJobInfo(tokens, source=source))
     return jobs
