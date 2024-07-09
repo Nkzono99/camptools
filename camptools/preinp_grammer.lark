@@ -40,6 +40,8 @@ factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | 
 num_sin       : "sin" "(" num_expr ")"
 num_cos       : "cos" "(" num_expr ")"
 num_to_int    : "int" "(" num_expr ")"
+trans_unit    : "unit" "." symbol "." "trans" "(" num_expr ")"
+reverse_unit  : "unit" "." symbol "." "reverse" "(" num_expr ")"
 number        : integer | float
 
 ?variable_expr  : variable | variable_element

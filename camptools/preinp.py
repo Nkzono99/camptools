@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import numpy as np
-from emout import InpFile
+from emout import InpFile, Units
 from lark import Lark, Transformer
 
 
@@ -52,12 +52,17 @@ class Functions(object):
 
 
 class CallFunctionTransformer(Transformer):
-    def __init__(self, inp, functions):
+    def __init__(self, inp, functions, unit=None):
         super().__init__()
         self._env = {}
         self._inp = inp
         self._current_group = None
         self._functions = functions
+        self._unit = unit
+
+    @property
+    def unit(self):
+        return self._unit
 
     def set_current_group(self, group):
         self._current_group = group
@@ -125,9 +130,23 @@ class CallFunctionTransformer(Transformer):
 
     def num_sin(self, tree):
         return np.sin(tree[0])
-    
+
     def num_to_int(self, tree):
         return int(tree[0])
+
+    def trans_unit(self, tree):
+        if self.unit is None:
+            raise ValueError()
+
+        name, value = tree
+        return getattr(self.unit, name).trans(value)
+
+    def reverse_unit(self, tree):
+        if self.unit is None:
+            raise ValueError()
+
+        name, value = tree
+        return getattr(self.unit, name).reverse(value)
 
     def kwarg_name(self, tree):
         return tree[0]
@@ -178,8 +197,13 @@ def main():
 
     inp = InpFile(preinp_path)
 
+    if inp.convkey:
+        unit = Units(dx=inp.convkey.dx, to_c=inp.convkey.to_c)
+    else:
+        unit = None
+
     functions = Functions(inp)
-    inp_transformer = CallFunctionTransformer(inp, functions)
+    inp_transformer = CallFunctionTransformer(inp, functions, unit=unit)
 
     with open(preinp_path, encoding="utf-8") as f:
         chained_line = ''
