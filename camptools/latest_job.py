@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--directory", default="./")
     parser.add_argument("--index", "-i", default=-1, type=int)
     parser.add_argument("--n", "-n", default=5, type=int)
+    parser.add_argument("--error", "-e", action="store_true")
 
     return parser.parse_args()
 
@@ -28,9 +29,9 @@ def main():
     root = Path(args.directory)
     data = emout.Emout(root)
 
-    latest_stdout_path = sorted(list(root.glob("stdout.*.log")), key=parse_job_id)[
-        args.index
-    ]
+    pipe = "err" if args.error else "out"
+    latest_stdout_pathes = sorted(list(root.glob(f"std{pipe}.*.log")), key=parse_job_id)
+    latest_stdout_path = latest_stdout_pathes[args.index]
 
     stdout, stderr = call(f"tail -n {args.n} {str(latest_stdout_path)}")
 
