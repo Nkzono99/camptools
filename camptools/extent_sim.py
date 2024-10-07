@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import os
-
+import re
 import emout
 
 from .utils import call, copy, symlinkdir
@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument('--nstep', '-n', type=int, default=None)
     parser.add_argument('--small', '-small', action='store_true')
     parser.add_argument('--run', action='store_true')
-    parser.add_argument('--submit', '-s', default='mypjsub')
+    parser.add_argument('--submit', '-s', default='mysbatch')
 
     return parser.parse_args()
 
@@ -57,8 +57,19 @@ def extent_sim():
             copy(bash, to_dir)
         for inp_file in from_dir.glob('*.inp'):
             copy(inp_file, to_dir)
-
-    inp.save(to_dir / 'plasma.inp')
+        
+    if (from_dir / 'plasma.preinp').exists():
+        with open(from_dir / 'plasma.preinp', 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    
+        with open(to_dir / 'plasma.preinp', 'w', encoding='utf-8') as f:
+            for line in lines:
+                line = re.sub(r'jobnum(\(.*\))? *= *0 *, *[01]', 'jobnum(1:2) = 1, 1', line)
+                if args.nstep:
+                    line = re.sub(r'nstep *= *[0-9]+', f'nstep = {args.nstep}', line)
+                f.write(line)
+    else:
+        inp.save(to_dir / 'plasma.inp')
     symlinkdir((from_dir / 'SNAPSHOT1').resolve(), to_dir / 'SNAPSHOT0')
 
     if args.run:
