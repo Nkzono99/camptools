@@ -1,14 +1,14 @@
-start         : statement
+?start         : statement
 
 ?statement    : definition | assignment | convert_expr
 
 
 // パラメータのマクロ的定義
-definition    : define_expr
-define_expr   : define | define_list
+?definition    : define_expr
+?define_expr   : define | define_list | define_list_with_index
 define        : symbol "=" value
 define_list   : symbol "=" values
-
+define_list_with_index : symbol "(" array_key ")" "=" values
 
 // マクロ内で用いる変数代入
 assignment    : "var" symbol "=" value
@@ -26,9 +26,16 @@ kwarg         : kwarg_name "=" value
 
 
 // 細かいトークンの記述
-?values       : [value ("," value)+]
+values       : value_list
+?value_list   : [value ("," value)*]
 ?value        : string | num_expr
 kwarg_name    : symbol
+
+array_key     : index_list
+?index_list   : [index ("," index)*]
+?index         : num_expr | slice
+slice         : num_expr ":" num_expr
+
 ?num_expr     : term | num_add | num_sub
 num_add       : num_expr "+" term
 num_sub       : num_expr "-" term

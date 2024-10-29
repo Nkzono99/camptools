@@ -34,21 +34,14 @@ class Functions(object):
             yl -= yc
             yu -= yc
 
-        self.inp.nml["ptcond"].start_index["xlrechole"] = [1]
-        self.inp.nml["ptcond"].start_index["xurechole"] = [1]
-        self.inp.nml["ptcond"].start_index["ylrechole"] = [1]
-        self.inp.nml["ptcond"].start_index["yurechole"] = [1]
-        self.inp.nml["ptcond"].start_index["zlrechole"] = [1]
-        self.inp.nml["ptcond"].start_index["zurechole"] = [1]
+        text = f"xlrechole(1:2) = {xl}, {xl}\n" + \
+               f"xurechole(1:2) = {xu}, {xu}\n" + \
+               f"ylrechole(1:2) = {yl}, {yl}\n" + \
+               f"yurechole(1:2) = {yu}, {yu}\n" + \
+               f"zlrechole(1:2) = {zu-1}, {zl}\n" + \
+               f"zurechole(1:2) = {zu}, {zu-1}\n"
 
-        self.inp.nml["ptcond"]["xlrechole"] = [xl, xl]
-        self.inp.nml["ptcond"]["xurechole"] = [xu, xu]
-        self.inp.nml["ptcond"]["ylrechole"] = [yl, yl]
-        self.inp.nml["ptcond"]["yurechole"] = [yu, yu]
-        self.inp.nml["ptcond"]["zlrechole"] = [zu - 1, zl]
-        self.inp.nml["ptcond"]["zurechole"] = [zu, zu - 1]
-
-        return self.inp
+        return text
 
 
 class CallFunctionTransformer(Transformer):
@@ -68,18 +61,18 @@ class CallFunctionTransformer(Transformer):
         self._current_group = group
 
     def define(self, tree):
-        self._inp.nml[self._current_group][tree[0]] = tree[1]
+        return f"    {tree[0]} = {tree[1]}\n"
 
     def define_list(self, tree):
-        if self._current_group is None:
-            raise Exception(
-                f"{tree[0]} is defined outside the any group: {tree[0]} = {tree[1]}"
-            )
-        self._inp.nml[self._current_group].start_index[tree[0]] = [1]
-        self._inp.nml[self._current_group][tree[0]] = tree[1].children
+        return f"    {tree[0]} = {tree[1]}\n"
+    
+    def define_list_with_index(self, tree):
+        return f"    {tree[0]}({tree[1]}) = {tree[2]}\n"
 
     def assignment(self, tree):
         self._env[tree[0]] = tree[1]
+
+        return ""
 
     def convert_expr(self, tree):
         if len(tree) == 3:
@@ -109,6 +102,20 @@ class CallFunctionTransformer(Transformer):
     def kwarg(self, tree):
         kwarg_name, value = tree
         return (kwarg_name, value)
+    
+    def values(self, tree):
+        return ', '.join(map(str, tree[0].children))
+    
+    def array_key(self, tree):
+        if hasattr(tree[0], "children"):
+            indexes = tree[0].children
+        else:
+            indexes = [tree[0]]
+        return ', '.join(map(str, indexes))
+
+    def slice(self, tree):
+        num1, num2 = tree
+        return f"{num1}:{num2}"
 
     def num_add(self, tree):
         return tree[0] + tree[1]
@@ -182,6 +189,7 @@ def parse_args():
     parser.add_argument("--directory", "-d", default="./")
     parser.add_argument("--preinp_file", "-i", default="plasma.preinp")
     parser.add_argument("--output", "-o", default="plasma.inp")
+    parser.add_argument("--verbose", "-v", action='store_true')
 
     return parser.parse_args()
 
@@ -206,8 +214,35 @@ def main():
     inp_transformer = CallFunctionTransformer(inp, functions, unit=unit)
 
     with open(preinp_path, encoding="utf-8") as f:
+        lines = f.readlines()
+    
+    with open(directory / args.output, "w", encoding='utf-8') as f:
         chained_line = ''
-        for line in f:
+        for line in lines:
+            if args.verbose:
+                print(line, end="")
+
+            if line.strip().startswith("!!>"):
+                line = line.replace('!!>', '')
+
+                if len(line.strip()) == 0:
+                    continue
+
+                chained_line += line.replace('\\', '')
+
+                if line.strip().endswith('\\'):
+                    continue
+
+                tree = lark_parser.parse(chained_line)
+                line = inp_transformer.transform(tree)
+                chained_line = ''
+
+                if args.verbose:
+                    s = line.replace('\n', '')
+                    print(f'==> "{s.replace("    ", "")}"', end="\n")
+
+            f.write(line)
+
             if line.strip().startswith("&"):
                 group = line.strip().replace("&", "")
                 inp_transformer.set_current_group(group)
@@ -215,17 +250,6 @@ def main():
             elif line.strip().startswith("/"):
                 inp_transformer.set_current_group(None)
 
-            elif line.strip().startswith("!!>"):
-                line = line.replace('!!>', '')
-                chained_line += line.replace('\\', '')
-
-                if line.strip().endswith('\\'):
-                    continue
-                tree = lark_parser.parse(chained_line)
-                inp_transformer.transform(tree)
-                chained_line = ''
-
-    inp.save(directory / args.output)
 
 
 if __name__ == "__main__":
