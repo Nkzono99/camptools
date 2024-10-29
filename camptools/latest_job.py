@@ -79,7 +79,7 @@ def main():
 
 
 def parse_job_id(filepath):
-    return int(str(filepath).replace("stdout.", "").replace(".log", ""))
+    return int(str(filepath).replace("stdout.", "").replace("stderr.", "").replace(".log", ""))
 
 
 if __name__ == "__main__":
