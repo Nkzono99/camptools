@@ -123,6 +123,12 @@ class CallFunctionTransformer(Transformer):
     def num_sub(self, tree):
         return tree[0] - tree[1]
 
+    def num_min(self, tree):
+        return min(tree[0], tree[1])
+
+    def num_max(self, tree):
+        return max(tree[0], tree[1])
+
     def num_mul(self, tree):
         return tree[0] * tree[1]
 

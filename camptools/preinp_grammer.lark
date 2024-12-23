@@ -36,9 +36,11 @@ array_key     : index_list
 ?index         : num_expr | slice
 slice         : num_expr ":" num_expr
 
-?num_expr     : term | num_add | num_sub
+?num_expr     : term | num_add | num_sub | num_min | num_max
 num_add       : num_expr "+" term
 num_sub       : num_expr "-" term
+num_min       : "min" "(" num_expr "," num_expr ")"
+num_max       : "max" "(" num_expr "," num_expr ")"
 
 ?term         : factor | num_mul | num_div
 num_mul       : term "*" factor
