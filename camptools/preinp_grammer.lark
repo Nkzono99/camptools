@@ -36,11 +36,20 @@ array_key     : index_list
 ?index         : num_expr | slice
 slice         : num_expr ":" num_expr
 
-?num_expr     : term | num_add | num_sub | num_min | num_max
+?num_expr     : term | num_add | num_sub | num_min | num_max | num_if_else
 num_add       : num_expr "+" term
 num_sub       : num_expr "-" term
 num_min       : "min" "(" num_expr "," num_expr ")"
 num_max       : "max" "(" num_expr "," num_expr ")"
+
+num_if_else   : num_expr "if" condition "else" num_expr
+?condition    : cond_lt | cond_le | cond_eq | cond_ge | cond_gt | cond_ne
+cond_lt       : num_expr "<" num_expr
+cond_le       : num_expr "<=" num_expr
+cond_eq       : num_expr "==" num_expr
+cond_ge       : num_expr ">=" num_expr
+cond_gt       : num_expr ">" num_expr
+cond_ne       : num_expr "!=" num_expr
 
 ?term         : factor | num_mul | num_div
 num_mul       : term "*" factor

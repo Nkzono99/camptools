@@ -134,6 +134,27 @@ class CallFunctionTransformer(Transformer):
 
     def num_div(self, tree):
         return tree[0] / tree[1]
+    
+    def num_if_else(self, tree):
+        return tree[0] if tree[1] else tree[2]
+    
+    def cond_lt(self, tree):
+        return tree[0] < tree[1]
+    
+    def cond_le(self, tree):
+        return tree[0] <= tree[1]
+    
+    def cond_eq(self, tree):
+        return tree[0] == tree[1]
+    
+    def cond_ge(self, tree):
+        return tree[0] >= tree[1]
+    
+    def cond_gt(self, tree):
+        return tree[0] > tree[1]
+    
+    def cond_ne(self, tree):
+        return tree[0] != tree[1]
 
     def factor(self, tree):
         return tree[0]
