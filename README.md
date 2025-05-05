@@ -94,3 +94,54 @@ $ filesync notify <key>
   <key>名のロックを解放する (~/.camptoolsからロック情報を削除する)
 ```
 
+### preinp
+
+`preinp` は、Fortran の `NAMELIST` 入力ファイル用プレプロセッサを Python で実装した軽量ツールです。
+マクロを用いた定義・演算により、手作業では煩雑になりがちなパラメータ生成を自動化できます。
+
+#### オプション一覧
+
+| オプション                 | 説明             | デフォルト           |
+| --------------------- | -------------- | --------------- |
+| `-d`, `--directory`   | 入力ファイル所在ディレクトリ | `./`            |
+| `-i`, `--preinp_file` | 前処理対象ファイル名     | `plasma.preinp` |
+| `-o`, `--output`      | 出力ファイル名        | `plasma.inp`    |
+| `-v`, `--verbose`     | 詳細ログを表示        | オフ              |
+
+#### 実行例
+
+```bash
+# 入力ディレクトリ './input' の 'plasma.preinp' を処理
+preinp -d input -i plasma.preinp -o plasma.inp
+
+# 詳細ログ付き
+preinp -v
+```
+
+#### マクロ記法
+
+* `!!>` で始まる行をマクロ処理の対象とし、末尾に `\` を付けると行継続できます。
+* **一時変数の定義**: `var symbol = value` で計算中に利用する変数を登録。
+* **定数定義**: `symbol = value` または `symbol(index) = val1, val2` で、最終的に出力される NAMELIST 値を指定。
+* **算術演算・条件式**: `+`, `-`, `*`, `/`, `min(a,b)`, `x if cond else y` など。
+* **単位変換**: （オプション）`unit.<name>.trans(value)` / `unit.<name>.reverse(value)` を利用可能。
+
+#### Example
+
+`plasma.preinp`:
+
+```fortran
+&simulation
+!!> var nx = 128
+!!> var ny = 64
+!!> total_cells = nx * ny
+/
+```
+
+生成される `plasma.inp`:
+
+```fortran
+&simulation
+    total_cells = 8192
+/
+```
