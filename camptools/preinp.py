@@ -62,6 +62,9 @@ class CallFunctionTransformer(Transformer):
 
     def define(self, tree):
         return f"    {tree[0]} = {tree[1]}\n"
+    
+    def define_with_index(self, tree):
+        return f"    {tree[0]}({tree[1]}) = {tree[2]}\n"
 
     def define_list(self, tree):
         return f"    {tree[0]} = {tree[1]}\n"

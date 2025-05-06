@@ -5,8 +5,9 @@
 
 // パラメータのマクロ的定義
 ?definition    : define_expr
-?define_expr   : define | define_list | define_list_with_index
+?define_expr   : define | define_with_index | define_list | define_list_with_index
 define        : symbol "=" value
+define_with_index : symbol "(" array_key ")" "=" value
 define_list   : symbol "=" values
 define_list_with_index : symbol "(" array_key ")" "=" values
 
