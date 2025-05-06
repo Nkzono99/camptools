@@ -54,7 +54,7 @@ cond_ne       : num_expr "!=" num_expr
 ?term         : factor | num_mul | num_div
 num_mul       : term "*" factor
 num_div       : term "/" factor
-factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | num_to_int
+factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | num_to_int | trans_unit | reverse_unit
 num_sin       : "sin" "(" num_expr ")"
 num_cos       : "cos" "(" num_expr ")"
 num_to_int    : "int" "(" num_expr ")"
