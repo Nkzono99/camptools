@@ -131,10 +131,12 @@ preinp -v
 `plasma.preinp`:
 
 ```fortran
+!!key dx=[0.001],to_c=[10000.0]
 &simulation
 !!> var nx = 128
 !!> var ny = 64
 !!> total_cells = nx * ny
+!!> velocity = unit.v.trans(10000)
 /
 ```
 
@@ -143,5 +145,50 @@ preinp -v
 ```fortran
 &simulation
     total_cells = 8192
+    velocity = 0.33356409519815206
 /
+```
+
+#### 単位変換についての補足
+
+- ```物理単位系 → EMSES単位系```変換 (```unit.<name>.trans(value)```)
+- ```EMSES単位系 → 物理単位系```変換 (```unit.<name>.reverse(value)```)
+
+```<name>```　一覧
+
+```
+B = Magnetic flux density [T]
+C = Capacitance [F]
+E = Electric field [V/m]
+F = Force [N]
+G = Conductance [S]
+J = Current density [A/m^2]
+L = Inductance [H]
+N = Flux [/m^2s]
+P = Power [W]
+T = Temperature [K]
+W = Energy [J]
+a = Acceleration [m/s^2]
+c = Light Speed [m/s]
+e = Napiers constant []
+e0 = FS-Permttivity [F/m]
+eps = Permittivity  [F/m]
+f = Frequency [Hz]
+i = Current [A]
+kB = Boltzmann constant [J/K]
+length = Sim-to-Real length ratio [m]
+m = Mass [kg]
+m0 = FS-Permeablity [N/A^2]
+mu = Permiability [H/m]
+n = Number density [/m^3]
+phi = Potential [V]
+pi = Circular constant []
+q = Charge [C]
+q_m = Charge-to-mass ratio [C/kg]
+qe = Elementary charge [C]
+qe_me = Electron charge-to-mass ratio [C/kg]
+rho = Charge density [C/m^3]
+t = Time [s]
+v = Velocity [m/s]
+w = Energy density [J/m^3]
 ```
