@@ -3,7 +3,7 @@ camphor用ツール
 
 ## インストール
 ```
-  pip install camptools --user
+  pip install camptools
 ```
 
 ## コマンド一覧
