@@ -121,8 +121,12 @@ class SubmitedJobInfo:
         self.encoding = encoding
 
     def tail(self, ntail=5) -> str:
+        if self.source == "o":
+            filepath = f"stdout.{self.jobid}.log"
+        else:
+            filepath = f"stderr.{self.jobid}.log"
         o_data, _ = call(
-            f"qcat -{self.source} {self.jobid} | tail -n {ntail}",
+            f"tail -n {ntail} {filepath.resolve()}",
             encoding=self.encoding,
         )
         return o_data

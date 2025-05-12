@@ -78,8 +78,8 @@ def main():
     print(f"{timedelta2str(elapsed)} / {timedelta2str(estimates)}")
 
 
-def parse_job_id(filepath):
-    return int(str(filepath).replace("stdout.", "").replace("stderr.", "").replace(".log", ""))
+def parse_job_id(filepath: Path):
+    return int(str(filepath.name).replace("stdout.", "").replace("stderr.", "").replace(".log", ""))
 
 
 if __name__ == "__main__":
