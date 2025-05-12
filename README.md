@@ -9,19 +9,18 @@ camphor用ツール
 ## コマンド一覧
 ### ジョブを投入し、ジョブIDを記録する
 ```
-$ nmyqsub <job file> -m <message> -d <directory>
+$ nmysbatch <job file> -m <message> -d <directory>
   jobを投入し、job情報を記録する(job_status.sh, joblist.shなどに使用)
   directoryを指定した場合、指定ディレクトリに移動後にqsubを実行
 
-$ myqsub <job file> -m <message> -d <directory>
+$ mysbatch <job file> -m <message> -d <directory>
   jobを投入し、job情報を記録する(job_status.sh, joblist.shなどに使用)
   directoryを指定した場合、指定ディレクトリに移動後にqsubを実行
   投入されるjobファイルは、パラメータファイルplasma.inpに応じてノード数を決定し置換したもの
   python環境にf90nmlが必要
   
   <job file>の形式は以下のようにすること
-    1. #QSUB -A p={}:t=1:c=64:m=90G
-    2. aprun -n {} -d 1 -N 64 ./mpiemses3D plasma.inp
+    1. #SBATCH --rsc p=32:t=1:c=1
 ```
 
 ### 実行中のジョブ状態を確認する
@@ -57,6 +56,21 @@ $ extentsim <from-dir> <to-dir> --run
 $ mymkdir --key <key> <directory>
   keyで指定した構成のディレクトリを作成する
   ディレクトリ構成の設定は~/copylist.jsonに記載する
+```
+
+```copylist.json```
+```
+{
+  "main": [
+        "/home/**/*****/large0/Github/MPIEMSES3D/bin/mpiemses3D",
+        "/home/**/*****/large0/job.sh",
+        "/home/**/*****/large0/plot_example.ipynb"
+  ],
+
+  "emses": [
+        "/home/**/*****/large0/Github/MPIEMSES3D/bin/mpiemses3D",
+  ],
+}
 ```
 
 ### 簡易的なジョブファイルを作成する
