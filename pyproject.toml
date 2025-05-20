@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "camptools"
+version = "0.10.5"
+description = "Tools for camphor"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+authors = [
+  { name = "Nkzono", email = "71783375+Nkzono99@users.noreply.github.com" }
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "f90nml",
+  "numpy",
+  "emout",
+  "lark",
+  "pyyaml",
+  "jsonschema",
+  "jinja2",
+]
+
+[project.scripts]
+nmyqsub      = "camptools.qsub_wrapper:nmyqsub"
+myqsub       = "camptools.qsub_wrapper:myqsub"
+job_status   = "camptools.job_status:job_status"
+joblist      = "camptools.job_status:joblist"
+jobhistory   = "camptools.job_history:job_history"
+mymkdir      = "camptools.mymkdir:mymkdir"
+extentsim    = "camptools.extent_sim:extent_sim"
+cmdjob       = "camptools.cmdjob:cmdjob"
+checkpoint   = "camptools.checkpoint:main"
+simmanager   = "camptools.simmanager.simmanager:main"
+create_vdist = "camptools.create_vdist:main"
+convunit     = "camptools.conversion_unit:main"
+filesync     = "camptools.filesync:main"
+nmypjsub     = "camptools.grand.pjsub_wrapper:nmypjsub"
+mypjsub      = "camptools.grand.pjsub_wrapper:mypjsub"
+nmysbatch    = "camptools.job_scheduler.sbatch_wrapper:nmysbatch"
+mysbatch     = "camptools.job_scheduler.sbatch_wrapper:mysbatch"
+latestjob    = "camptools.latest_job:main"
+preinp       = "camptools.preinp:main"
+param_sweep  = "camptools.param_sweep.cli:main"
+
+
+[tool.setuptools]
+packages = { find = {} }
+
+include-package-data = true
