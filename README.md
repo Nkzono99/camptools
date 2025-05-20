@@ -206,3 +206,113 @@ t = Time [s]
 v = Velocity [m/s]
 w = Energy density [J/m^3]
 ```
+
+### param_sweep
+
+*YAML 1 枚から複数の EMSES / mpEMSES 解析ディレクトリを自動生成し、必要ならそのままジョブ投入まで行う極小 CLI ツール。*
+
+---
+
+#### 1. 基本ディレクトリ構成
+
+```text
+project/
+├── sweep.yaml            # ← ① サーベイ定義
+└── plasma.preinp.j2      # ← ② Jinja2 テンプレート
+```
+
+案件ごとに複数の `*.yaml` / `*.j2` を置いても OK です。
+
+---
+
+#### 2. `sweep.yaml` の書き方
+
+```yaml
+# schemaは未用意
+# $schema: https://raw.githubusercontent.com/USER/param_sweep/main/schema/sweep.schema.json
+
+# 例: scale × ratio の 2×3 = 6 ケース
+params:
+  scale: [0.5, 1.0]
+  ratio: [0.3, 0.6, 1.0]
+  nstep: 200000           # スカラー → 全ケース共通
+
+cases:
+  # 特別ケースを追加 & 一組をスキップ
+  - scale: 1.0
+    ratio: 0.6
+    temp: 5e4
+  - scale: 0.5
+    ratio: 0.3
+    _skip: true           # 実行対象から除外
+```
+
+* **`params:`**  … リストは *直積展開*、スカラーは共通値。
+* **`cases:`**   … 手書きで追加・上書き・除外。`_skip` / `_only` が使用可。
+
+---
+
+#### 3. テンプレート (`plasma.preinp.j2`)
+
+```fortran
+&tmgrid
+    dt = {{ dt | default(0.004) }}
+    nx = {{ nx }}
+    ny = {{ ny }}
+    nz = {{ nz }}
+/
+```
+
+* `{{ var }}` が YAML/計算結果で置換。
+* `default()` フィルタで未定義時のフォールバックを設定可能。
+
+---
+
+#### 4. CLI の基本操作
+
+```bash
+# dry-run: ディレクトリ名だけ表示
+$ param_sweep sweep.yaml --dry-run
+exp_scale0p5_ratio0p3
+exp_scale0p5_ratio0p6
+…
+
+# ディレクトリ生成＆preinp 実行（ジョブ未投入）
+$ param_sweep sweep.yaml --template plasma.preinp.j2
+
+# 生成後に mysbatch で投入
+$ param_sweep sweep.yaml --run
+
+# YAML を編集せずに一時上書き
+$ param_sweep sweep.yaml -s ratio=10 --dry-run
+```
+
+※ コマンドラインの指定は YAML の設定より常に優先されます。
+
+---
+
+#### 5. ディレクトリ名のルール
+
+```
+exp_scale0p5_ratio1_density1e6  # 0.5→0p5, 1e6→1M, 0.02→20m
+```
+
+* キーはアルファベット順。
+* 値は *工学表記* で短縮化（`naming.safe()` を参照）。
+
+---
+
+#### 6. 典型的ワークフロー
+
+```bash
+$ vim sweep.yaml                # 範囲を追加
+$ param_sweep sweep.yaml --dry-run    # 名称確認
+$ param_sweep sweep.yaml --run        # 実行開始
+```
+
+変数を増やすときは
+
+1. YAML の `params:` に追加
+2. テンプレートに `{{ var }}` を追加
+   だけで OK。
+
