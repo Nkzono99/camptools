@@ -168,6 +168,12 @@ class CallFunctionTransformer(Transformer):
     def num_sin(self, tree):
         return np.sin(tree[0])
 
+    def num_tan(self, tree):
+        return np.tan(tree[0])
+    
+    def num_sqrt(self, tree):
+        return np.sqrt(tree[0])
+
     def num_to_int(self, tree):
         return int(tree[0])
 

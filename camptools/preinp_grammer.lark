@@ -52,12 +52,14 @@ cond_ge       : num_expr ">=" num_expr
 cond_gt       : num_expr ">" num_expr
 cond_ne       : num_expr "!=" num_expr
 
-?term         : factor | num_mul | num_div
+?term         : factor| num_mul | num_div
 num_mul       : term "*" factor
 num_div       : term "/" factor
-factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | num_to_int | trans_unit | reverse_unit
+factor        : number | variable_expr | "(" num_expr ")" | num_sin | num_cos | num_tan | num_sqrt | num_to_int | trans_unit | reverse_unit
 num_sin       : "sin" "(" num_expr ")"
 num_cos       : "cos" "(" num_expr ")"
+num_tan       : "tan" "(" num_expr ")"
+num_sqrt       : "sqrt" "(" num_expr ")"
 num_to_int    : "int" "(" num_expr ")"
 trans_unit    : "unit" "." symbol "." "trans" "(" num_expr ")"
 reverse_unit  : "unit" "." symbol "." "reverse" "(" num_expr ")"
