@@ -86,8 +86,6 @@ $ mymkdir --key <key> <directory>
 
 </details>
 
----
-
 ### preinp
 
 `preinp` は、Fortran の `NAMELIST` 入力ファイル用プレプロセッサを Python で実装した軽量ツールです。
