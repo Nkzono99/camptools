@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List
 
 from .case import Case
-from .naming import replace_vars
 from .renderer import render_template
 
 
@@ -15,7 +14,7 @@ def create_case_dir(case: Case, exp: Path, template: Path):
 
     txt = render_template(template, case.params)
 
-    (exp / "plasma.preinp").write_text(replace_vars(txt, case.params))
+    (exp / "plasma.preinp").write_text(txt)
     subprocess.run(["preinp", "-d", exp], check=True)
 
 

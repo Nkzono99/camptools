@@ -1,66 +1,11 @@
 import logging
 from argparse import ArgumentParser
-from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict
 
 from .case import Case, expand_params
 from .config import load_yaml
 from .runner import run_cases
-
-
-def _parse_override(s: str) -> Dict[str, float]:
-    k, v = s.split("=", 1)
-    return {k: float(v)}
-
-
-def _dict_eq(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
-    """キーと値が完全一致するか（順不同）。"""
-    return a.items() == b.items()
-
-
-def build_cases(cfg: dict, cli_over: Dict[str, float], cwd: Path) -> List[Case]:
-    """
-    params の直積をベースに、cases で
-      • 追加
-      • 値の上書き
-      • _skip / _only
-    を適用して最終ケース一覧を返す。
-    """
-    # ------------------------------------------------------------------ ① 直積
-    base_cases: List[Dict[str, Any]] = expand_params(cfg.get("params", {}))
-
-    # ------------------------------------------------------------------ ② cases
-    add_cases: List[Dict[str, Any]] = []
-    only_cases: List[Dict[str, Any]] = []
-
-    for c in cfg.get("cases", []):
-        body = {k: v for k, v in c.items() if not k.startswith("_")}  # メタキー除去
-
-        if c.get("_skip"):  # スキップ → base_cases から除外
-            base_cases = [bc for bc in base_cases if not _dict_eq(bc, body)]
-            continue
-
-        if c.get("_only"):  # _only → 別リストへ
-            only_cases.append(body)
-            continue
-
-        add_cases.append(body)  # 通常は追加（後でマージ）
-
-    # _only があればそれだけ、無ければ base+add
-    effective = only_cases if only_cases else base_cases + add_cases
-
-    # ------------------------------------------------------------------ ③ CLI 上書き
-    for d in effective:
-        d.update(cli_over)
-
-    # ------------------------------------------------------------------ ④ 重複排除（同じ dict が複数出来得るため）
-    uniq: "OrderedDict[frozenset, Dict[str, Any]]" = OrderedDict()
-    for d in effective:
-        uniq[frozenset(d.items())] = d  # 後勝ち(Until Python 3.8+ insertion order)
-
-    # ------------------------------------------------------------------ ⑤ Case へ
-    return [Case(params=p, root=cwd) for p in uniq.values()]
 
 
 def parse_args():
@@ -68,7 +13,7 @@ def parse_args():
 
     ap.add_argument("yaml")
     ap.add_argument("--set", "-s", action="append", default=[], metavar="NAME=VAL")
-    ap.add_argument("--template", default="plasma.preinp")
+    ap.add_argument("--template", default="plasma.preinp.j2")
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--extent", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
@@ -96,6 +41,48 @@ def main():
         dry=args.dry_run,
         template=Path(args.template),
     )
+
+
+def _parse_override(s: str) -> Dict[str, float]:
+    k, v = s.split("=", 1)
+    return {k: float(v)}
+
+
+def build_cases(cfg: dict, cli_over: Dict[str, float], cwd: Path):
+    raw_blocks = cfg.get("cases", [])
+    # ① 各ブロックを expand_params で展開してリスト化
+    all_dicts = []
+    for block in raw_blocks:
+        # メタキー (_skip/_only) を除いた純パラメータ dict
+        params_dict = {k: v for k, v in block.items() if not k.startswith("_")}
+        # 直積展開
+        for combo in expand_params(params_dict):
+            # 同じ block の _skip/_only は展開後の全ケースに継承
+            combo["_skip"] = block.get("_skip", False)
+            combo["_only"] = block.get("_only", False)
+            all_dicts.append(combo)
+
+    # ② _only/_skip を処理
+    only_mode = any(d.get("_only") for d in all_dicts)
+    filtered = []
+    for d in all_dicts:
+        if d.get("_skip"):
+            continue
+        if only_mode and not d.get("_only"):
+            continue
+        filtered.append(d)
+
+    # ③ CLI オーバーライドをマージ
+    for d in filtered:
+        d.update(cli_over)
+
+    # ④ Case オブジェクト化
+    return [
+        Case(
+            params={k: v for k, v in d.items() if k not in ("_skip", "_only")}, root=cwd
+        )
+        for d in filtered
+    ]
 
 
 if __name__ == "__main__":

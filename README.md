@@ -232,19 +232,13 @@ project/
 # $schema: https://raw.githubusercontent.com/USER/param_sweep/main/schema/sweep.schema.json
 
 # 例: scale × ratio の 2×3 = 6 ケース
-params:
-  scale: [0.5, 1.0]
-  ratio: [0.3, 0.6, 1.0]
-  nstep: 200000           # スカラー → 全ケース共通
-
 cases:
-  # 特別ケースを追加 & 一組をスキップ
-  - scale: 1.0
-    ratio: 0.6
-    temp: 5e4
-  - scale: 0.5
-    ratio: 0.3
-    _skip: true           # 実行対象から除外
+  - scale: [0.5, 1.0]
+    ratio: [0.3, 1.0]
+    nstep: 200000
+  - scale: [0.5, 1.0]
+    ratio: [0.6]
+    nstep: 500000
 ```
 
 * **`params:`**  … リストは *直積展開*、スカラーは共通値。
