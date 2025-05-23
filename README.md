@@ -147,7 +147,7 @@ preinp -v
 ```fortran
 !!key dx=[0.001],to_c=[10000.0]
 &simulation
-!!> var nx = 128
+    nx = 128
 !!> var ny = 64
 !!> total_cells = nx * ny
 !!> velocity = unit.v.trans(10000)
@@ -158,6 +158,7 @@ preinp -v
 
 ```fortran
 &simulation
+    nx = 128
     total_cells = 8192
     velocity = 0.33356409519815206
 /
