@@ -23,6 +23,8 @@ $ mysbatch <job file> -m <message> -d <directory>
     1. #SBATCH --rsc p=32:t=1:c=1
 ```
 
+---
+
 ### 実行中のジョブ状態を確認する
 ```
 $ job_status
@@ -31,6 +33,8 @@ $ job_status
 $ joblist
   jobの状態を出力
 ```
+
+---
 
 ### これまでに投入したジョブ一覧を表示する
 ```
@@ -43,6 +47,8 @@ $ jobhistory -n <num outputs> --correct_date
     (この日付情報は保存されるため毎回呼ばなくても良い)
 ```
 
+---
+
 ### EMSESの継続ジョブを投入する
 ```
 $ extentsim <from-dir> <to-dir> --run
@@ -51,6 +57,8 @@ $ extentsim <from-dir> <to-dir> --run
   runフラグを指定するとmyqsubによるジョブの投入まで行う
 ```
 
+---
+
 ### ディレクトリセットを作成する
 ```
 $ mymkdir --key <key> <directory>
@@ -58,7 +66,10 @@ $ mymkdir --key <key> <directory>
   ディレクトリ構成の設定は~/copylist.jsonに記載する
 ```
 
-```copylist.json```
+<details>
+
+<summary>copylist.json</summary>
+
 ```
 {
   "main": [
@@ -73,45 +84,18 @@ $ mymkdir --key <key> <directory>
 }
 ```
 
-### 簡易的なジョブファイルを作成する
-```
-$ cmdjob [-h] {register,create} ...
-$ cmdjob register -ug <usergroup> -s <system> --local
-  作成するjobの設定を登録する
-  localフラグを指定するとそのディレクトリ以下での設定が変更される
-$ cmdjob create <command> -o <output>
-  commandを実行するジョブファイルを作成する
-  出力ファイル名はoutputで指定(デフォルト: tmpjob.sh)
-```
+</details>
 
-### よく使うディレクトリのパスを記録する
-```
-$ checkpoint {register, clear, list}
-$ checkpoint register -m <message>
-  カレントディレクトリをチェックポイントとして保存する
-$ checkpoint clear -a -i <index>
-  チェックポイントを削除する
-  -aフラグを指定するとすべてのチェックポイントを削除する
-  -iフラグを指定すると指定した番号をチェックポイントを削除する
-$ checkpoint list
-  チェックポイントのリストを表示する
-```
-
-### システム内で同期をとる
-```
-$ filesync {lock, wait, notify}
-$ filesync lock <key>
-  <key>名のロックを確保する (~/.camptools内にロック情報を書き込む)
-$ filesync wait <key>
-  <key>名のロックが確保されていたら待機する
-$ filesync notify <key>
-  <key>名のロックを解放する (~/.camptoolsからロック情報を削除する)
-```
+---
 
 ### preinp
 
 `preinp` は、Fortran の `NAMELIST` 入力ファイル用プレプロセッサを Python で実装した軽量ツールです。
 マクロを用いた定義・演算により、手作業では煩雑になりがちなパラメータ生成を自動化できます。
+
+<details>
+
+<summary>Usage</summary>
 
 #### オプション一覧
 
@@ -208,12 +192,18 @@ v = Velocity [m/s]
 w = Energy density [J/m^3]
 ```
 
+</details>
+
+---
+
 ### param_sweep
 
 *YAML 1 枚から複数の EMSES解析ディレクトリを自動生成し、必要ならそのままジョブ投入まで行うツール。*
 
----
-
+<details>
+  
+<summary>Usage</summary>
+  
 #### 1. 基本ディレクトリ構成
 
 ```text
@@ -223,8 +213,6 @@ project/
 ```
 
 実験ごとに複数の `*.yaml` / `*.j2` を置いても OK です。
-
----
 
 #### 2. `sweep.yaml` の書き方
 
@@ -245,8 +233,6 @@ cases:
 * **`params:`**  … リストは *直積展開*、スカラーは共通値。
 * **`cases:`**   … 手書きで追加・上書き・除外。`_skip` / `_only` が使用可。
 
----
-
 #### 3. テンプレート (`plasma.preinp.j2`)
 
 ```fortran
@@ -260,8 +246,6 @@ cases:
 
 * `{{ var }}` が YAML/計算結果で置換。
 * `default()` フィルタで未定義時のフォールバックを設定可能。
-
----
 
 #### 4. CLI の基本操作
 
@@ -286,8 +270,6 @@ $ param_sweep sweep.yaml -s ratio=10 --dry-run
 
 ※ ディレクトリは```mymkdir```のデフォルトで生成されます。シミュレーションに必要なファイル群はそちらで指定してください。
 
----
-
 #### 5. ディレクトリ名のルール
 
 ```
@@ -296,8 +278,6 @@ exp_scale0p5_ratio1_density1e6  # 0.5→0p5, 1e6→1M, 0.02→20m
 
 * キーはアルファベット順。
 * 値は *工学表記* で短縮化（`naming.safe()` を参照）。
-
----
 
 #### 6. 典型的ワークフロー
 
@@ -313,3 +293,4 @@ $ param_sweep sweep.yaml --run        # 実行開始
 2. テンプレートに `{{ var }}` を追加
    だけで OK。
 
+</details>
