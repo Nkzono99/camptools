@@ -61,16 +61,16 @@ class CallFunctionTransformer(Transformer):
         self._current_group = group
 
     def define(self, tree):
-        return f"    {tree[0]} = {tree[1]}\n"
+        return f"  {tree[0]} = {tree[1]}\n"
     
     def define_with_index(self, tree):
-        return f"    {tree[0]}({tree[1]}) = {tree[2]}\n"
+        return f"  {tree[0]}({tree[1]}) = {tree[2]}\n"
 
     def define_list(self, tree):
-        return f"    {tree[0]} = {tree[1]}\n"
+        return f"  {tree[0]} = {tree[1]}\n"
     
     def define_list_with_index(self, tree):
-        return f"    {tree[0]}({tree[1]}) = {tree[2]}\n"
+        return f"  {tree[0]}({tree[1]}) = {tree[2]}\n"
 
     def assignment(self, tree):
         self._env[tree[0]] = tree[1]
