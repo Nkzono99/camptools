@@ -19,8 +19,6 @@ def joblist():
     
     colorama.init()
 
-    print("=" * 20)
-
     for job in jobs:
         if job.jobid in job_dict:
             directory = job_dict[job.jobid].directory
@@ -40,8 +38,6 @@ def joblist():
             + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}) : {directory} : {message}"
             + colorama.Style.RESET_ALL
         )
-
-    print("=" * 20)
 
 
 def parse_args_job_status():
