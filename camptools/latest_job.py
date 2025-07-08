@@ -52,7 +52,7 @@ def main():
     print(f"{steps[-1]} / {data.inp.nstep} ({job_elapsed_rate*100: .2f} %)")
 
     # 予想時間を計算する
-    m = re.match(r"stdout\.([0-9]+)\.log", str(latest_stdout_path))
+    m = re.match(r".*stdout\.([0-9]+)\.log", str(latest_stdout_path))
     if m is None:
         return
     job_id = int(m.group(1))

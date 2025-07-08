@@ -3,7 +3,7 @@ from pathlib import Path
 
 from .jobs import JobHistoryManager, create_submited_jobs
 from .utils import call
-
+import colorama
 
 def parse_args_joblist():
     parser = ArgumentParser()
@@ -16,6 +16,8 @@ def joblist():
 
     job_dict = JobHistoryManager()
     job_dict.load()
+    
+    colorama.init()
 
     print("=" * 20)
 
@@ -26,10 +28,17 @@ def joblist():
         else:
             directory = "Not Found"
             message = ""
+        
+        status_colors = {
+            'RUN':  colorama.Fore.GREEN,
+            'PEND': colorama.Fore.LIGHTBLACK_EX,
+            'FINI': colorama.Fore.CYAN,
+            'CACL': colorama.Fore.RED,
+        }
         print(
-            "{} ({}, {}) : {} : {}".format(
-                job.jobid, job.status, job.elapse, directory, message
-            )
+            status_colors.get(job.status, colorama.Fore.WHITE)
+            + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}) : {directory} : {message}"
+            + colorama.Style.RESET_ALL
         )
 
     print("=" * 20)
@@ -60,8 +69,8 @@ def job_status():
             directory = "Not Found"
             message = ""
         print(
-            "{} ({}, {}) : {} : {}".format(
-                job.jobid, job.status, job.elapse, directory, message
+            "{} ({}, {}, {}) : {} : {}".format(
+                job.jobid, job.status, job.elapse, job.queue, directory, message
             )
         )
 
