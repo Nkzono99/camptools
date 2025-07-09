@@ -5,8 +5,11 @@ from .jobs import JobHistoryManager, create_submited_jobs
 from .utils import call
 import colorama
 
+
 def parse_args_joblist():
     parser = ArgumentParser()
+    parser.add_argument("--status", "-s", action="store_true")
+    parser.add_argument("--n", "-n", type=int, default=5)
     return parser.parse_args()
 
 
@@ -16,7 +19,7 @@ def joblist():
 
     job_dict = JobHistoryManager()
     job_dict.load()
-    
+
     colorama.init()
 
     for job in jobs:
@@ -26,18 +29,73 @@ def joblist():
         else:
             directory = "Not Found"
             message = ""
-        
+
         status_colors = {
-            'RUN':  colorama.Fore.GREEN,
-            'PEND': colorama.Fore.LIGHTBLACK_EX,
-            'FINI': colorama.Fore.CYAN,
-            'CACL': colorama.Fore.RED,
+            "RUN": colorama.Fore.GREEN,
+            "PEND": colorama.Fore.LIGHTBLACK_EX,
+            "FINI": colorama.Fore.CYAN,
+            "CANC": colorama.Fore.RED,
         }
-        print(
-            status_colors.get(job.status, colorama.Fore.WHITE)
-            + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}) : {directory} : {message}"
-            + colorama.Style.RESET_ALL
-        )
+
+        root = Path(directory)
+        if args.status and root.exists():
+            job_elapsed_rate = calculate_rate(args, root, job.jobid)
+            print(
+                status_colors.get(job.status, colorama.Fore.WHITE)
+                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}, {job_elapsed_rate*100: 4.2f} %) : {directory} : {message}"
+                + colorama.Style.RESET_ALL
+            )
+        else:
+            print(
+                status_colors.get(job.status, colorama.Fore.WHITE)
+                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}) : {directory} : {message}"
+                + colorama.Style.RESET_ALL
+            )
+
+
+def calculate_rate(args, root: Path, jobid: int):
+    pipe = "out"
+    latest_stdout_pathes = sorted(list(root.glob(f"std{pipe}.*.log")), key=parse_job_id)
+
+    if len(latest_stdout_pathes) == 0:
+        return 0.0
+
+    latest_stdout_path = latest_stdout_pathes[-1]
+
+    if parse_job_id(latest_stdout_path) != jobid:
+        return 0.0
+
+    stdout, stderr = call(f"tail -n {args.n} {str(latest_stdout_path)}")
+
+    # print(f"> {str(latest_stdout_path)}")
+    # print()
+    # print(stdout)
+
+    steps = []
+    for line in stdout.split("\n"):
+        if line.startswith(" **** step ---------"):
+            step = int(line.replace("**** step ---------", ""))
+            steps.append(step)
+
+    if len(steps) == 0:
+        return 0.0
+
+    import emout
+
+    data = emout.Emout(root)
+
+    job_elapsed_rate = max(steps[-1] / float(data.inp.nstep), 1e-8)
+
+    return job_elapsed_rate
+
+
+def parse_job_id(filepath: Path):
+    return int(
+        str(filepath.name)
+        .replace("stdout.", "")
+        .replace("stderr.", "")
+        .replace(".log", "")
+    )
 
 
 def parse_args_job_status():
