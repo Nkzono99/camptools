@@ -42,13 +42,13 @@ def joblist():
             job_elapsed_rate = calculate_rate(args, root, job.jobid)
             print(
                 status_colors.get(job.status, colorama.Fore.WHITE)
-                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}, {job_elapsed_rate*100: 4.2f} %) : {directory} : {message}"
+                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}|{job.proc:04}, {job_elapsed_rate*100:4.2f}%) : {directory} : {message}"
                 + colorama.Style.RESET_ALL
             )
         else:
             print(
                 status_colors.get(job.status, colorama.Fore.WHITE)
-                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}) : {directory} : {message}"
+                + f"{job.jobid} ({job.status:>4}, {job.elapse}, {job.queue:>8}|{job.proc:04}) : {directory} : {message}"
                 + colorama.Style.RESET_ALL
             )
 
