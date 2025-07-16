@@ -61,6 +61,8 @@ def main():
     jobs = [job for job in jobs if job.jobid == job_id]
     if len(jobs) == 1:
         job = jobs[0]
+    else:
+        return
 
     hours, minutes, seconds = map(int, job.elapse.split(":"))
     elapsed = timedelta(hours=hours, minutes=minutes, seconds=seconds)
