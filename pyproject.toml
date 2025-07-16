@@ -50,6 +50,7 @@ mysbatch     = "camptools.job_scheduler.sbatch_wrapper:mysbatch"
 latestjob    = "camptools.latest_job:main"
 preinp       = "camptools.preinp:main"
 param_sweep  = "camptools.param_sweep.cli:main"
+collect_report = "camptools.collect_report:main"
 
 
 [tool.setuptools]
