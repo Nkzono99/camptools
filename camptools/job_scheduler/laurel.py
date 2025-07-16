@@ -91,3 +91,21 @@ class LaurelJobFile(JobFile):
         for i in range(len(self.lines)):
             self.lines[i] = p.sub(f'#SBATCH -p {queue_name}', self.lines[i])
 
+    @property
+    def afterok(self):
+        p = re.compile(r'#SBATCH -d afterok:(\S+)')
+        for line in len(self.lines):
+            m = p.match(line)
+            if m:
+                return int(m.group(1))
+        return None
+
+    @afterok.setter
+    def afterok(self, id):
+        p = re.compile(r'#SBATCH')
+        for i in range(len(self.lines)):
+            m = p.match(self.lines[i])
+            
+            if m is not None:
+                self.lines.insert(i, f'#SBATCH -d afterok:{id}')
+                return
