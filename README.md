@@ -2,13 +2,15 @@
 camphor用ツール
 
 ## インストール
-```
+
+```bash
   pip install camptools
 ```
 
 ## コマンド一覧
 ### ジョブを投入し、ジョブIDを記録する
-```
+
+```bash
 $ nmysbatch <job file> -m <message> -d <directory>
   jobを投入し、job情報を記録する(job_status.sh, joblist.shなどに使用)
   directoryを指定した場合、指定ディレクトリに移動後にqsubを実行
@@ -26,41 +28,34 @@ $ mysbatch <job file> -m <message> -d <directory>
 ---
 
 ### 実行中のジョブ状態を確認する
-```
+
+```bash
 $ job_status
   jobの状態と標準出力の一部を出力
 
 $ joblist
   jobの状態を出力
-```
 
----
-
-### これまでに投入したジョブ一覧を表示する
-```
-$ jobhistory -n <num outputs> --correct_date
-  過去のjobのリストを表示
-  <job id>, <directory>, <message>, <date>
-
-  --correct_date: 
-    *.o*ファイルから日付を読み取りjobに日付情報を付加する
-    (この日付情報は保存されるため毎回呼ばなくても良い)
+$ latestjob
+  現在のディレクトリで実行された直近のジョブの標準出力の一部を表示
 ```
 
 ---
 
 ### EMSESの継続ジョブを投入する
-```
+
+```bash
 $ extentsim <from-dir> <to-dir> --run
   EMSESの継続シミュレーションを行う
   from-dirに存在するmpiemses3D, job.sh, SNAPSHOT1, generate_xdmf.pyをto-dirにコピーする
-  runフラグを指定するとmyqsubによるジョブの投入まで行う
+  runフラグを指定するとmysbatchによるジョブの投入まで行う
 ```
 
 ---
 
 ### ディレクトリセットを作成する
-```
+
+```bash
 $ mymkdir --key <key> <directory>
   keyで指定した構成のディレクトリを作成する
   ディレクトリ構成の設定は~/copylist.jsonに記載する
@@ -70,7 +65,7 @@ $ mymkdir --key <key> <directory>
 
 <summary>copylist.json</summary>
 
-```
+```json
 {
   "main": [
         "/home/**/*****/large0/Github/MPIEMSES3D/bin/mpiemses3D",
@@ -85,6 +80,40 @@ $ mymkdir --key <key> <directory>
 ```
 
 </details>
+
+---
+
+### シミュレーションバグレポート自動収集スクリプト
+
+以下のコマンド出力をまとめて Markdown 形式のレポート (`report.md`) を自動生成.
+
+1. カレントディレクトリ（`pwd`）  
+2. MPIEMSES3D のバージョン情報（`module load hdf5 fftw; ./mpiemses3D --version`）  
+3. 入力ファイル内容（`cat plasma.inp`）  
+4. 最新ジョブのログ（`latestjob -n 100` / `latestjob -n 100 -e`）  
+
+シミュレーションディレクトリで以下のように実行し、報告時に必要な最小限のデータを集約する。
+
+```bash
+$ collect_report
+
+```
+
+---
+
+### これまでに投入したジョブ一覧を表示する
+
+```bash
+$ jobhistory -n <num outputs> --correct_date
+  過去のjobのリストを表示
+  <job id>, <directory>, <message>, <date>
+
+  --correct_date: 
+    *.o*ファイルから日付を読み取りjobに日付情報を付加する
+    (この日付情報は保存されるため毎回呼ばなくても良い)
+```
+
+---
 
 ### preinp
 
