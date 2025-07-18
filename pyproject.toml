@@ -27,6 +27,7 @@ dependencies = [
   "jsonschema",
   "jinja2",
   "colorama",
+  "git+https://github.com/Nkzono99/mypython.git",
 ]
 
 [project.scripts]
@@ -51,7 +52,7 @@ latestjob    = "camptools.latest_job:main"
 preinp       = "camptools.preinp:main"
 param_sweep  = "camptools.param_sweep.cli:main"
 collect_report = "camptools.collect_report:main"
-
+setup_camphor = "camptools.setup_env.setup_camphor:main"
 
 [tool.setuptools]
 packages = { find = {} }

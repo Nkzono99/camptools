@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-SETTINGS_FILENAME = '.camptools'
+SETTINGS_FILENAME = Path.home() / "large0" / ".camptools" / "settings.txt"
 
 
 class Settings:
@@ -13,11 +13,11 @@ class Settings:
         self._filepath: Path = filepath
 
         if filepath.exists():
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 self._jsonobj: dict = json.load(f)
         else:
             self._jsonobj: dict = {}
-    
+
     @classmethod
     def home(cls) -> "Settings":
         return Settings(Path.home() / SETTINGS_FILENAME)
@@ -34,7 +34,7 @@ class Settings:
             curdir = curdir.parent
 
         if not (curdir / SETTINGS_FILENAME).exists():
-            raise Exception('[Error] settings file(.camptools) is not found.')
+            raise Exception("[Error] settings file(.camptools) is not found.")
         filepath = curdir / SETTINGS_FILENAME
         return Settings(filepath)
 
@@ -42,7 +42,7 @@ class Settings:
         if filepath is None:
             filepath = self._filepath
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(self._jsonobj, f)
 
     def __getitem__(self, key: str) -> Any:
