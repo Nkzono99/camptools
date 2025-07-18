@@ -27,7 +27,6 @@ dependencies = [
   "jsonschema",
   "jinja2",
   "colorama",
-  "mypython @ git+https://github.com/Nkzono99/mypython.git",
 ]
 
 [project.scripts]
