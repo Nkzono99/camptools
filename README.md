@@ -247,7 +247,7 @@ project/
 # schemaは未用意
 # $schema: https://raw.githubusercontent.com/USER/param_sweep/main/schema/sweep.schema.json
 
-# 例: scale × ratio の 2×3 = 6 ケース
+# 例: scale × ratio の 2×2 + 2×1 = 6 ケース
 cases:
   - scale: [0.5, 1.0]
     ratio: [0.3, 1.0]
