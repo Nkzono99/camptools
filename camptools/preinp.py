@@ -116,9 +116,12 @@ class CallFunctionTransformer(Transformer):
             indexes = [tree[0]]
         return ', '.join(map(str, indexes))
 
-    def slice(self, tree):
+    def slice_nn(self, tree):
         num1, num2 = tree
         return f"{num1}:{num2}"
+    
+    def slice_only(self, tree):
+        return ":"
 
     def num_add(self, tree):
         return tree[0] + tree[1]

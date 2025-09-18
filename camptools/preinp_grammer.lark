@@ -34,8 +34,10 @@ kwarg_name    : symbol
 
 array_key     : index_list
 ?index_list   : [index ("," index)*]
-?index         : num_expr | slice
-slice         : num_expr ":" num_expr
+?index        : num_expr | slice
+?slice        : slice_only | slice_nn
+slice_only    : ":"
+slice_nn      : num_expr ":" num_expr
 
 ?num_expr     : term | num_add | num_sub | num_min | num_max | num_if_else
 num_add       : num_expr "+" term
