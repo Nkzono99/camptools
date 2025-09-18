@@ -85,7 +85,7 @@ def extent_sim():
             parts += ["-qn", args.queue_name]
 
         if args.afterok:
-            parts += ["--afterok", args.afterok]
+            parts += ["--afterok", str(args.afterok)]
 
         cmd = " ".join(parts)
 

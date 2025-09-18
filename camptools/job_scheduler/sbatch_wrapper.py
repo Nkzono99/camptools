@@ -48,6 +48,7 @@ def nmysbatch():
         nprocs=args.nprocs,
         exec_time_hour=args.exec_time_hour,
         rscgrp=args.rscgrp,
+        afterok=args.afterok,
     )
 
     job_id = jobqueue.throw(args.tmpjob_filepath)
@@ -70,6 +71,7 @@ def mysbatch():
         nprocs=nprocs,
         exec_time_hour=args.exec_time_hour,
         queue_name=args.queue_name,
+        afterok=args.afterok,
     )
 
     job_id = jobqueue.throw(args.tmpjob_filepath)

@@ -107,5 +107,5 @@ class LaurelJobFile(JobFile):
             m = p.match(self.lines[i])
             
             if m is not None:
-                self.lines.insert(i, f'#SBATCH -d afterok:{id}')
+                self.lines.insert(i, f'#SBATCH -d afterok:{id}\n')
                 return
