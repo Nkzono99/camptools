@@ -17,6 +17,7 @@ def parse_args():
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--extent", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--queue_name", "-qn", default=None, type=str)
 
     args = ap.parse_args()
 
@@ -40,6 +41,7 @@ def main():
         extent=args.extent,
         dry=args.dry_run,
         template=Path(args.template),
+        queue_name=args.queue_name,
     )
 
 

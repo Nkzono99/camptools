@@ -18,7 +18,15 @@ def create_case_dir(case: Case, exp: Path, template: Path):
     subprocess.run(["preinp", "-d", exp], check=True)
 
 
-def run_cases(cases: List[Case], *, run: bool, extent: bool, dry: bool, template: Path):
+def run_cases(
+    cases: List[Case],
+    *,
+    run: bool,
+    extent: bool,
+    dry: bool,
+    template: Path,
+    queue_name: str,
+):
     for case in cases:
         exp = case.exp_path()
 
@@ -30,7 +38,12 @@ def run_cases(cases: List[Case], *, run: bool, extent: bool, dry: bool, template
             if not exp.exists():
                 logging.warning("%s not found; skip", exp)
                 continue
-            subprocess.run(["extentsim", "--run", exp], check=True)
+            cmdlist = ["extentsim", "--run", exp]
+
+            if queue_name is not None:
+                cmdlist += ["-qn", queue_name]
+
+            subprocess.run(cmdlist, check=True)
             continue
 
         if exp.exists():
@@ -40,4 +53,9 @@ def run_cases(cases: List[Case], *, run: bool, extent: bool, dry: bool, template
         create_case_dir(case, exp, template)
 
         if run:
-            subprocess.run(["mysbatch", "job.sh", "-d", exp], check=True)
+            cmdlist = ["mysbatch", "job.sh", "-d", exp]
+
+            if queue_name is not None:
+                cmdlist += ["-qn", queue_name]
+
+            subprocess.run(cmdlist, check=True)
