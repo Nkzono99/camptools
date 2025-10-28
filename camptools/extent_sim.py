@@ -54,6 +54,7 @@ def extent_sim():
         copy(from_dir / "job.sh", to_dir / "job.sh")
         copy(from_dir / "mpiemses3D", to_dir / "mpiemses3D")
         copy(from_dir / "generate_xdmf3.py", to_dir / "generate_xdmf3.py")
+        copy(from_dir / ".logs", to_dir / ".logs")
 
         for bash in from_dir.glob("*.sh"):
             copy(bash, to_dir)
