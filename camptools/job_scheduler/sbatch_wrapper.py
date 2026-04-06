@@ -5,11 +5,14 @@ from os import PathLike
 from pathlib import Path
 
 import f90nml
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover
+    import tomli as tomllib
 
 from ..jobs import JobHistoryManager
 from .core import QueueLimit
 from .laurel import LaurelJobFile, LaurelJobQueue
-from .throw_job_wrapper import nmythrow, mythrow
 
 save_file = Path().home() / "jobs.txt"
 
@@ -20,7 +23,7 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument("job_filepath")
-    parser.add_argument("--inputfile", "-i", default="plasma.inp")
+    parser.add_argument("--inputfile", "-i", default=None)
     parser.add_argument("--tmpjob_filepath", "-o", default="myjob.sh")
     parser.add_argument("--message", "-m", default="")
     parser.add_argument("--date", action="store_true")
@@ -39,15 +42,12 @@ def nmysbatch():
     if args.directory:
         os.chdir(args.directory)
 
-    jobqueue = LaurelJobQueue()
-
     create_tmpjob(
         args.job_filepath,
         args.tmpjob_filepath,
-        system=args.system,
         nprocs=args.nprocs,
         exec_time_hour=args.exec_time_hour,
-        rscgrp=args.rscgrp,
+        queue_name=args.queue_name,
         afterok=args.afterok,
     )
 
@@ -63,7 +63,8 @@ def mysbatch():
     if args.directory:
         os.chdir(args.directory)
 
-    nprocs = args.nprocs or calc_nprocs(args.inputfile)
+    inputfile = args.inputfile or default_inputfile()
+    nprocs = args.nprocs or calc_nprocs(inputfile)
 
     create_tmpjob(
         args.job_filepath,
@@ -114,8 +115,27 @@ def create_tmpjob(
     jobfile.save(tmpjob_filepath)
 
 
-def calc_nprocs(filename):
-    nml = f90nml.read(filename)
-    nodes_str = nml["mpi"]["nodes"]
-    nodes = list(map(int, nodes_str))
+def default_inputfile() -> str:
+    if Path("plasma.toml").exists():
+        return "plasma.toml"
+    return "plasma.inp"
+
+
+def parse_nodes(nodes):
+    if isinstance(nodes, str):
+        nodes = nodes.replace(",", " ").split()
+    return [int(node) for node in nodes]
+
+
+def calc_nprocs(filename: str):
+    filepath = Path(filename)
+
+    if filepath.suffix == ".toml":
+        with filepath.open("rb") as f:
+            toml = tomllib.load(f)
+        nodes = parse_nodes(toml["mpi"]["nodes"])
+    else:
+        nml = f90nml.read(filepath)
+        nodes = parse_nodes(nml["mpi"]["nodes"])
+
     return nodes[0] * nodes[1] * nodes[2]

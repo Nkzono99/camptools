@@ -27,6 +27,7 @@ dependencies = [
   "jsonschema",
   "jinja2",
   "colorama",
+  "tomli; python_version < '3.11'",
 ]
 
 [project.scripts]
